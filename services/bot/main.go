@@ -9,18 +9,13 @@ import (
 	"github.com/SomeSuperCoder/global-chat/internal/bot"
 	botregexps "github.com/SomeSuperCoder/global-chat/internal/bot/regexps"
 	statemachine "github.com/SomeSuperCoder/global-chat/internal/bot/state_machine"
+	stateunits "github.com/SomeSuperCoder/global-chat/internal/bot/state_units"
 	botstates "github.com/SomeSuperCoder/global-chat/internal/bot/states"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-)
-
-const (
-	STATE_NONE statemachine.StateUnit = iota
-	STATE_ENTER_NAME
-	STATE_ENTER_BIRTHDATE
 )
 
 func main() {
@@ -65,7 +60,7 @@ func main() {
 		b.StateMutex.Lock()
 		defer b.StateMutex.Unlock()
 
-		b.State.SetState(statemachine.StateKey(update.CallbackQuery.From.ID), STATE_ENTER_NAME, botstates.RegisterState{})
+		b.State.SetState(statemachine.StateKey(update.CallbackQuery.From.ID), stateunits.STATE_ENTER_NAME, botstates.RegisterState{})
 		b.Bot.SendMessage(ctx, tu.Message(
 			tu.ID(update.CallbackQuery.From.ID),
 			"Как вас зовут? (ФИО)",
@@ -86,7 +81,7 @@ func main() {
 		data, _ := currentState.Data.(botstates.RegisterState)
 		data.Name = update.Message.Text
 		// Set state
-		b.State.SetState(statemachine.StateKey(update.Message.From.ID), STATE_ENTER_BIRTHDATE, data)
+		b.State.SetState(statemachine.StateKey(update.Message.From.ID), stateunits.STATE_ENTER_BIRTHDATE, data)
 
 		b.Bot.SendMessage(ctx, tu.Message(
 			tu.ID(update.Message.From.ID),
@@ -98,7 +93,7 @@ func main() {
 		b.StateMutex.RLock()
 		defer b.StateMutex.RUnlock()
 		stateUnit := b.State.GetState(statemachine.StateKey(update.Message.From.ID)).State
-		return stateUnit == STATE_ENTER_NAME
+		return stateUnit == stateunits.STATE_ENTER_NAME
 	}, th.TextMatches(regexp.MustCompile(botregexps.NAME_PATTERN)))
 
 	// Handle STATE_ENTER_BIRTHDATE
@@ -114,7 +109,7 @@ func main() {
 		parsedBirthDate, _ := time.Parse(update.Message.Text, "02.01.2006")
 		data.Birthdate = parsedBirthDate
 		// Set state
-		b.State.SetState(statemachine.StateKey(update.Message.From.ID), STATE_NONE, nil)
+		b.State.SetState(statemachine.StateKey(update.Message.From.ID), stateunits.STATE_NONE, nil)
 
 		// Query DB
 		newUser := &models.User{
@@ -142,7 +137,7 @@ func main() {
 		b.StateMutex.RLock()
 		defer b.StateMutex.RUnlock()
 		stateUnit := b.State.GetState(statemachine.StateKey(update.Message.From.ID)).State
-		return stateUnit == STATE_ENTER_BIRTHDATE
+		return stateUnit == stateunits.STATE_ENTER_BIRTHDATE
 	}, th.TextMatches(regexp.MustCompile(botregexps.BIRTHDATE_PATTERN)))
 
 	b.Start()
