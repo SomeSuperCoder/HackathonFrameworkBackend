@@ -25,7 +25,13 @@ type TeamsResponse struct {
 	TotalCount int64         `json:"count"`
 }
 
-var validate = validator.New()
+func NewValidate() *validator.Validate {
+	validate := validator.New()
+	validate.RegisterValidation("grades", models.ValidateGrades)
+	return validate
+}
+
+var validate = NewValidate()
 
 func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 	// Get data
@@ -160,7 +166,7 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Leader:          userAuth.ID,
 		Repos:           make([]string, 0),
 		PresentationURI: "",
-		Grades:          make(map[bson.ObjectID]map[bson.ObjectID]int),
+		Grades:          make(models.Grades),
 		CratedAt:        time.Now(),
 	})
 
@@ -193,13 +199,13 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse TODO: validate URLs and grades
+	// Parse
 	var request struct {
-		Name            string                                  `json:"name" bson:"name,omitempty" validate:"omitempty,min=1,max=20"`
-		Leader          bson.ObjectID                           `json:"leader" bson:"leader,omitempty"`
-		Repos           []string                                `json:"repos" bson:"repos,omitempty"`
-		PresentationURI string                                  `json:"presentation_uri" bson:"presentation_uri,omitempty"`
-		Grades          map[bson.ObjectID]map[bson.ObjectID]int `json:"grades" bson:"grades,omitempty"`
+		Name            string        `json:"name" bson:"name,omitempty" validate:"omitempty,min=1,max=20"`
+		Leader          bson.ObjectID `json:"leader" bson:"leader,omitempty"`
+		Repos           []string      `json:"repos" bson:"repos,omitempty" validate:"omitempty,dive,url"`
+		PresentationURI string        `json:"presentation_uri" bson:"presentation_uri,omitempty" validate:"omitempty,url"`
+		Grades          models.Grades `json:"grades" bson:"grades,omitempty" validate:"grades"`
 	}
 	err = json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
