@@ -25,14 +25,14 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.Repo.GetUserByID(r.Context(), parsedUserID)
+	user, err := h.Repo.GetByID(r.Context(), parsedUserID)
 	getUserCommon(user, err, w)
 }
 
 func (h *UserHandler) GetUserByUsername(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
 
-	user, err := h.Repo.GetUserByUsername(r.Context(), username)
+	user, err := h.Repo.GetByUsername(r.Context(), username)
 	getUserCommon(user, err, w)
 }
 
