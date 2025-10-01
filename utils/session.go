@@ -2,37 +2,52 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/SomeSuperCoder/global-chat/repository"
+	"github.com/sirupsen/logrus"
+	initdata "github.com/telegram-mini-apps/init-data-golang"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var AuthError = errors.New("Unauthorized")
 
-func Authorize(r *http.Request, db *mongo.Database) (*repository.UserAuth, error) {
+func Authorize(r *http.Request, db *mongo.Database) (*repository.UserAuth, error, int) {
 	// Init repo
 	repo := repository.UserRepo{
 		Database: db,
 	}
 
-	// Get the session token from the cookie
-	st, err := r.Cookie("session_token")
-	if err != nil || st.Value == "" {
-		return nil, err
-	}
+	// Load init data from header
+	initData := r.Header.Get("TG-Init-Data")
 
-	// Get the CSRF token from the headers
-	csrf := r.Header.Get("X-CSRF-Token")
-	if csrf == "" {
-		return nil, AuthError
-	}
+	token := os.Getenv("TELEGRAM_TOKEN")
+	expIn := 24 * time.Hour
 
-	// Verify
-	userAuth, err := repo.AuthCheck(r.Context(), st.Value, csrf)
+	err := initdata.Validate(initData, token, expIn)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to validate initdata: %w", err), http.StatusBadRequest
 	}
 
-	return userAuth, nil
+	// Parse initdata
+	initDataParsed, err := initdata.Parse(initData)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to parse initdata: %w", err), http.StatusBadRequest
+	}
+	username := initDataParsed.User.Username
+	logrus.Info(username)
+
+	user, err := repo.GetUserByUsername(r.Context(), username)
+	if err != nil {
+		return nil, fmt.Errorf("User not found: %w", err), http.StatusUnauthorized
+	}
+	userAuth := &repository.UserAuth{
+		Username: user.Username,
+		UserID:   user.ID,
+	}
+
+	return userAuth, nil, http.StatusNoContent
 }

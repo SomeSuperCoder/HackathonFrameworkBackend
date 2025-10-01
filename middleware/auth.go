@@ -23,9 +23,9 @@ func ExtractUserAuth(r *http.Request) *repository.UserAuth {
 
 func AuthMiddleware(next http.HandlerFunc, db *mongo.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userAuth, err := utils.Authorize(r, db)
+		userAuth, err, code := utils.Authorize(r, db)
 		if err != nil {
-			http.Error(w, fmt.Errorf("Failed to authorize: %w", err).Error(), http.StatusUnauthorized)
+			http.Error(w, fmt.Errorf("Failed to authorize: %w", err).Error(), code)
 			return
 		}
 

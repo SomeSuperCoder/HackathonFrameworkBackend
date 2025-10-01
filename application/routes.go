@@ -16,7 +16,7 @@ func loadRoutes(db *mongo.Database) http.Handler {
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "OK")
 	})
-	mux.Handle("/auth/", loadAuthRoutes(db))
+	mux.Handle("/users/", loadAuthRoutes(db))
 
 	return middleware.LoggerMiddleware(mux)
 }
@@ -31,9 +31,6 @@ func loadAuthRoutes(db *mongo.Database) http.Handler {
 
 	authMux.HandleFunc("GET /{id}", authHandler.GetUser)
 	authMux.HandleFunc("GET /by-name/{username}", authHandler.GetUserByUsername)
-	authMux.HandleFunc("POST /register", authHandler.Register)
-	authMux.HandleFunc("POST /login", authHandler.Login)
-	authMux.HandleFunc("POST /logout", middleware.AuthMiddleware(authHandler.Logout, db))
 
-	return http.StripPrefix("/auth", authMux)
+	return http.StripPrefix("/users", authMux)
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -24,6 +25,11 @@ func New() *App {
 
 func (a *App) Start(ctx context.Context) error {
 	var err error
+	// Load .env
+	err = godotenv.Load()
+	if err != nil {
+		return fmt.Errorf("Failed to load .env: %w", err)
+	}
 	// ========== MongoDB ==========
 	connectionString := "mongodb://localhost:27017"
 	a.client, err = mongo.Connect(options.Client().ApplyURI(connectionString))
