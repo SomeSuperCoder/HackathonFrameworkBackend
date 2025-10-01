@@ -17,9 +17,7 @@ var AuthError = errors.New("Unauthorized")
 
 func Authorize(r *http.Request, db *mongo.Database) (*repository.UserAuth, error, int) {
 	// Init repo
-	repo := repository.UserRepo{
-		Database: db,
-	}
+	repo := repository.NewUserRepo(db)
 
 	// Load init data from header
 	initData := r.Header.Get("TG-Init-Data")

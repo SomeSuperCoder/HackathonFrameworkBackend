@@ -24,9 +24,7 @@ func loadRoutes(db *mongo.Database) http.Handler {
 func loadAuthRoutes(db *mongo.Database) http.Handler {
 	authMux := http.NewServeMux()
 	authHandler := &handlers.UserHandler{
-		Repo: repository.UserRepo{
-			Database: db,
-		},
+		Repo: *repository.NewUserRepo(db),
 	}
 
 	authMux.HandleFunc("GET /{id}", authHandler.GetUser)

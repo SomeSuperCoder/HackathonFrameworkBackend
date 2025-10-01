@@ -57,9 +57,7 @@ func (b *Bot) Start(ctx context.Context) {
 	b.database = b.client.Database("hackathonframework")
 
 	// Init database repos
-	b.UserRepo = &repository.UserRepo{
-		Database: b.database,
-	}
+	b.UserRepo = repository.NewUserRepo(b.database)
 
 	// Init state manager
 	b.State = statemachine.NewBotState()

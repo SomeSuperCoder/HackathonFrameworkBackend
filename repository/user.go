@@ -10,7 +10,15 @@ import (
 )
 
 type UserRepo struct {
-	Database *mongo.Database
+	database *mongo.Database
+	Users    *mongo.Collection
+}
+
+func NewUserRepo(database *mongo.Database) *UserRepo {
+	return &UserRepo{
+		database: database,
+		Users:    database.Collection("users"),
+	}
 }
 
 type UserAuth struct {
@@ -19,7 +27,7 @@ type UserAuth struct {
 }
 
 func (r *UserRepo) CreateUser(ctx context.Context, user *models.User) error {
-	_, err := r.Database.Collection("users").InsertOne(ctx, user)
+	_, err := r.Users.InsertOne(ctx, user)
 	return err
 }
 
@@ -37,7 +45,7 @@ func (r *UserRepo) getUserCommon(ctx context.Context, filter bson.M) (*models.Us
 	})
 
 	var user models.User
-	err := r.Database.Collection("users").FindOne(ctx, filter, opts).Decode(&user)
+	err := r.Users.FindOne(ctx, filter, opts).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
