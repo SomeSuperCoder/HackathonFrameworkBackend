@@ -22,7 +22,7 @@ func (b *Bot) EnterBirthdate(ctx *th.Context, update telego.Update) error {
 	currentState := b.State.GetState(statemachine.StateKey(update.Message.From.ID))
 	// Update state
 	data, _ := currentState.Data.(botstates.RegisterState)
-	parsedBirthDate, _ := time.Parse(update.Message.Text, "02.01.2006")
+	parsedBirthDate, _ := time.Parse("02.01.2006", update.Message.Text)
 	data.Birthdate = parsedBirthDate
 	// Set state
 	b.State.SetState(statemachine.StateKey(update.Message.From.ID), stateunits.STATE_NONE, nil)

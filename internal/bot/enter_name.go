@@ -9,7 +9,6 @@ import (
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
-	"github.com/sirupsen/logrus"
 )
 
 func (b *Bot) EnterName(ctx *th.Context, update telego.Update) error {
@@ -34,7 +33,6 @@ func (b *Bot) EnterName(ctx *th.Context, update telego.Update) error {
 }
 
 func (b *Bot) InvalidEnterName(ctx *th.Context, update telego.Update) error {
-	logrus.Info("Invalid enter name!!!!!!!")
 	_, err := b.Bot.SendMessage(ctx, tu.Message(
 		tu.ID(update.Message.Chat.ID),
 		"Некорректное ФИО\\!\nПример ФИО: `Иванов Иван Иванович`\nЕсли у вас нет отчества, вводите фамилию и имя в формате:\n`Иванов Иван`",
