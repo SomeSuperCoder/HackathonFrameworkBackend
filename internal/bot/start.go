@@ -2,6 +2,7 @@ package bot
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
@@ -33,11 +34,17 @@ func (b *Bot) StartCommand(ctx *th.Context, update telego.Update) error {
 		))
 		return err
 	}
+	botUser, _ := b.Bot.GetMe(ctx)
+	inlineKeyboard := tu.InlineKeyboard(
+		tu.InlineKeyboardRow(
+			tu.InlineKeyboardButton("Открыть мини-приложение").WithURL(fmt.Sprintf("t.me/%v/controlcenter", botUser.Username)),
+		),
+	)
 
 	b.Bot.SendMessage(ctx, tu.Messagef(
 		tu.ID(update.Message.Chat.ID),
 		"%v, добро пожаловать в личный кабинет!", user.Name,
-	))
+	).WithReplyMarkup(inlineKeyboard))
 
 	return nil
 }
