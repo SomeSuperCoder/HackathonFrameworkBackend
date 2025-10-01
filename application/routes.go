@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/SomeSuperCoder/global-chat/handlers"
-	"github.com/SomeSuperCoder/global-chat/middleware"
+	"github.com/SomeSuperCoder/global-chat/internal/middleware"
 	"github.com/SomeSuperCoder/global-chat/repository"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
