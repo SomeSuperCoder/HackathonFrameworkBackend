@@ -1,4 +1,4 @@
-package botstates
+package states
 
 import "time"
 

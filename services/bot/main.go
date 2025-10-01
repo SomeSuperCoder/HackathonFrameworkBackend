@@ -8,10 +8,11 @@ import (
 	"sync"
 	"time"
 
+	botregexps "github.com/SomeSuperCoder/global-chat/internal/bot/regexps"
+	statemachine "github.com/SomeSuperCoder/global-chat/internal/bot/state_machine"
+	botstates "github.com/SomeSuperCoder/global-chat/internal/bot/states"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
-	botstates "github.com/SomeSuperCoder/global-chat/services/bot/bot_states"
-	statemachine "github.com/SomeSuperCoder/global-chat/state_machine"
 	"github.com/joho/godotenv"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
@@ -26,10 +27,6 @@ const (
 	STATE_ENTER_NAME
 	STATE_ENTER_BIRTHDATE
 )
-
-// Regexp patterns
-const NAME_PATTERN = `^[А-ЯЁ][а-яё]+(\s+[А-ЯЁ][а-яё]+){1,2}$`
-const BIRTHDATE_PATTERN = `^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19|20)\d{2}$`
 
 func CheckErrorDeadly(err error, message string) {
 	if err != nil {
@@ -142,7 +139,7 @@ func main() {
 		defer botStateMutex.RUnlock()
 		stateUnit := botState.GetState(statemachine.StateKey(update.Message.From.ID)).State
 		return stateUnit == STATE_ENTER_NAME
-	}, th.TextMatches(regexp.MustCompile(NAME_PATTERN)))
+	}, th.TextMatches(regexp.MustCompile(botregexps.NAME_PATTERN)))
 
 	// Handle STATE_ENTER_BIRTHDATE
 	bh.Handle(func(ctx *th.Context, update telego.Update) error {
@@ -186,7 +183,7 @@ func main() {
 		defer botStateMutex.RUnlock()
 		stateUnit := botState.GetState(statemachine.StateKey(update.Message.From.ID)).State
 		return stateUnit == STATE_ENTER_BIRTHDATE
-	}, th.TextMatches(regexp.MustCompile(BIRTHDATE_PATTERN)))
+	}, th.TextMatches(regexp.MustCompile(botregexps.BIRTHDATE_PATTERN)))
 
 	defer func() { _ = bh.Stop() }()
 	err = bh.Start()
