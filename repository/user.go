@@ -26,20 +26,20 @@ type UserAuth struct {
 	UserID   bson.ObjectID
 }
 
-func (r *UserRepo) CreateUser(ctx context.Context, user *models.User) error {
+func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
 	_, err := r.Users.InsertOne(ctx, user)
 	return err
 }
 
-func (r *UserRepo) GetUserByID(ctx context.Context, userID bson.ObjectID) (*models.User, error) {
-	return r.getUserCommon(ctx, bson.M{"_id": userID})
+func (r *UserRepo) GetByID(ctx context.Context, userID bson.ObjectID) (*models.User, error) {
+	return r.getCommon(ctx, bson.M{"_id": userID})
 }
 
-func (r *UserRepo) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
-	return r.getUserCommon(ctx, bson.M{"username": username})
+func (r *UserRepo) GetByUsername(ctx context.Context, username string) (*models.User, error) {
+	return r.getCommon(ctx, bson.M{"username": username})
 }
 
-func (r *UserRepo) getUserCommon(ctx context.Context, filter bson.M) (*models.User, error) {
+func (r *UserRepo) getCommon(ctx context.Context, filter bson.M) (*models.User, error) {
 	opts := options.FindOne().SetProjection(bson.M{
 		"sessions": 0,
 	})
