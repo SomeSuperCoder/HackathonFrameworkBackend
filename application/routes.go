@@ -17,18 +17,34 @@ func loadRoutes(db *mongo.Database) http.Handler {
 		fmt.Fprintln(w, "OK")
 	})
 	mux.Handle("/users/", loadAuthRoutes(db))
+	mux.Handle("/teams/", loadTeamRoutes(db))
 
 	return middleware.LoggerMiddleware(mux)
 }
 
-func loadAuthRoutes(db *mongo.Database) http.Handler {
-	authMux := http.NewServeMux()
-	authHandler := &handlers.UserHandler{
-		Repo: *repository.NewUserRepo(db),
+func loadTeamRoutes(db *mongo.Database) http.Handler {
+	teamMux := http.NewServeMux()
+	teamsHandler := &handlers.TeamHandler{
+		Repo: repository.NewTeamRepo(db),
 	}
 
-	authMux.HandleFunc("GET /{id}", authHandler.GetUser)
-	authMux.HandleFunc("GET /by-name/{username}", authHandler.GetUserByUsername)
+	teamMux.HandleFunc("GET /", teamsHandler.GetPaged)
+	teamMux.HandleFunc("GET /{id}", teamsHandler.GetByID)
+	teamMux.HandleFunc("GET /{id}/members", teamsHandler.GetMembers)
+	teamMux.HandleFunc("POST /", middleware.AuthMiddleware(teamsHandler.Create, db))
+	teamMux.HandleFunc("PATCH /{id}", middleware.AuthMiddleware(teamsHandler.Update, db))
 
-	return http.StripPrefix("/users", authMux)
+	return http.StripPrefix("/teams", teamMux)
+}
+
+func loadAuthRoutes(db *mongo.Database) http.Handler {
+	userMux := http.NewServeMux()
+	usersHandler := &handlers.UserHandler{
+		Repo: repository.NewUserRepo(db),
+	}
+
+	userMux.HandleFunc("GET /{id}", usersHandler.GetByID)
+	userMux.HandleFunc("GET /by-name/{username}", usersHandler.GetByUsername)
+
+	return http.StripPrefix("/users", userMux)
 }

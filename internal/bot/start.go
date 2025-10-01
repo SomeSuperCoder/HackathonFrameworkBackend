@@ -12,7 +12,7 @@ import (
 
 func (b *Bot) StartCommand(ctx *th.Context, update telego.Update) error {
 	// Check if user has an account
-	user, err := b.UserRepo.GetUserByUsername(ctx, update.Message.From.Username)
+	user, err := b.UserRepo.GetByUsername(ctx, update.Message.From.Username)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		// Handle the case where the user does not have an account
 		inlineKeyboard := tu.InlineKeyboard(

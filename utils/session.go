@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
 	"github.com/sirupsen/logrus"
 	initdata "github.com/telegram-mini-apps/init-data-golang"
@@ -15,7 +16,7 @@ import (
 
 var AuthError = errors.New("Unauthorized")
 
-func Authorize(r *http.Request, db *mongo.Database) (*repository.UserAuth, error, int) {
+func Authorize(r *http.Request, db *mongo.Database) (*models.User, error, int) {
 	// Init repo
 	repo := repository.NewUserRepo(db)
 
@@ -38,14 +39,10 @@ func Authorize(r *http.Request, db *mongo.Database) (*repository.UserAuth, error
 	username := initDataParsed.User.Username
 	logrus.Info(username)
 
-	user, err := repo.GetUserByUsername(r.Context(), username)
+	user, err := repo.GetByUsername(r.Context(), username)
 	if err != nil {
 		return nil, fmt.Errorf("User not found: %w", err), http.StatusUnauthorized
 	}
-	userAuth := &repository.UserAuth{
-		Username: user.Username,
-		UserID:   user.ID,
-	}
 
-	return userAuth, nil, http.StatusNoContent
+	return user, nil, http.StatusNoContent
 }

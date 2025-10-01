@@ -39,7 +39,7 @@ func (b *Bot) EnterBirthdate(ctx *th.Context, update telego.Update) error {
 		Team:      bson.NilObjectID,
 		CratedAt:  time.Now(),
 	}
-	err := b.UserRepo.CreateUser(ctx, newUser)
+	err := b.UserRepo.Create(ctx, newUser)
 
 	if err != nil {
 

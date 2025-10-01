@@ -12,10 +12,10 @@ import (
 )
 
 type UserHandler struct {
-	Repo repository.UserRepo
+	Repo *repository.UserRepo
 }
 
-func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	userID := r.PathValue("id")
 
 	// Parse the user id
@@ -26,29 +26,29 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := h.Repo.GetByID(r.Context(), parsedUserID)
-	getUserCommon(user, err, w)
+	getCommon(user, err, w)
 }
 
-func (h *UserHandler) GetUserByUsername(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetByUsername(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
 
 	user, err := h.Repo.GetByUsername(r.Context(), username)
-	getUserCommon(user, err, w)
+	getCommon(user, err, w)
 }
 
-func getUserCommon(user *models.User, err error, w http.ResponseWriter) {
+func getCommon(user *models.User, err error, w http.ResponseWriter) {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			http.Error(w, err.Error(), http.StatusNotFound)
+			http.Error(w, fmt.Sprintf("Not found: %s", err.Error()), http.StatusNotFound)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to get from DB: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
 	serializedUser, err := json.Marshal(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to marshal JSON: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 

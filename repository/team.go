@@ -91,12 +91,14 @@ func (r *TeamRepo) GetMembers(ctx context.Context, id bson.ObjectID) ([]models.U
 func (r *TeamRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
 	res := r.Teams.FindOneAndUpdate(ctx, bson.M{
 		"_id": id,
-	}, update)
+	}, bson.M{
+		"$set": update,
+	})
 
 	return res.Err()
 }
 
-func (r *TeamRepo) DeleteTeam(ctx context.Context, id bson.ObjectID) error {
+func (r *TeamRepo) Delete(ctx context.Context, id bson.ObjectID) error {
 	_, err := r.Teams.DeleteOne(ctx, bson.M{
 		"_id": id,
 	})
@@ -107,7 +109,9 @@ func (r *TeamRepo) DeleteTeam(ctx context.Context, id bson.ObjectID) error {
 	_, err = r.Users.UpdateMany(ctx, bson.M{
 		"team": id,
 	}, bson.M{
-		"team": bson.NilObjectID,
+		"$set": bson.M{
+			"team": bson.NilObjectID,
+		},
 	})
 	if err != nil {
 		return err
