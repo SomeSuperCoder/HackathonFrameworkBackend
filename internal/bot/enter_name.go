@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"context"
+
 	statemachine "github.com/SomeSuperCoder/global-chat/internal/bot/state_machine"
 	stateunits "github.com/SomeSuperCoder/global-chat/internal/bot/state_units"
 	botstates "github.com/SomeSuperCoder/global-chat/internal/bot/states"
@@ -28,4 +30,11 @@ func (b *Bot) EnterName(ctx *th.Context, update telego.Update) error {
 	).WithParseMode("MarkdownV2"))
 
 	return nil
+}
+
+func (b *Bot) EnterNamePredicate(ctx context.Context, update telego.Update) bool {
+	b.StateMutex.RLock()
+	defer b.StateMutex.RUnlock()
+	stateUnit := b.State.GetState(statemachine.StateKey(update.Message.From.ID)).State
+	return stateUnit == stateunits.STATE_ENTER_NAME
 }
