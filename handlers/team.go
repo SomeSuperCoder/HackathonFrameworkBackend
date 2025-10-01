@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -192,6 +193,15 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// Get auth data
 	userAuth := middleware.ExtractUserAuth(r)
 
+	// Check if team exists
+	team, err := h.Repo.GetByID(r.Context(), parsedId)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	} else if utils.CheckError(w, err, "Failed to get team from DB", http.StatusInternalServerError) {
+		return
+	}
+
 	// Check access
 	if userAuth.Role == models.Admin || userAuth.Role == models.Judge || parsedId == userAuth.Team {
 	} else {
@@ -218,24 +228,21 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extra access checks TODO: use custom validator tags for that
-	if request.Leader != bson.NilObjectID {
-		team, err := h.Repo.GetByID(r.Context(), parsedId)
-		if utils.CheckError(w, err, "Failed to get team from DB", http.StatusInternalServerError) {
-			return
-		}
-		if team.Leader == userAuth.ID {
-		} else {
-			http.Error(w, "Only the currernt leader can set the new one", http.StatusForbidden)
-			return
-		}
+	// Extra access checks
+	checks := []utils.Check{
+		{
+			Condition:   request.Leader != bson.NilObjectID,
+			Requirement: team.Leader == userAuth.ID,
+			Message:     "Only the current leader can set the new one",
+		},
+		{
+			Condition:   request.Grades != nil,
+			Requirement: userAuth.Role == models.Admin || userAuth.Role == models.Judge,
+			Message:     "You do not have the right to change grades",
+		},
 	}
-	if request.Grades != nil {
-		if userAuth.Role == models.Admin || userAuth.Role == models.Judge {
-		} else {
-			http.Error(w, "You cannot change grades", http.StatusForbidden)
-			return
-		}
+	if utils.MultiAccessCheck(w, checks) {
+		return
 	}
 
 	// Do work
