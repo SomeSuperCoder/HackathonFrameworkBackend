@@ -25,6 +25,12 @@ type Bot struct {
 	UserRepo   *repository.UserRepo
 }
 
+func NewBot() *Bot {
+	bot := &Bot{}
+
+	return bot
+}
+
 func (b *Bot) Start(ctx context.Context) {
 	// Load .env
 	err := godotenv.Load()

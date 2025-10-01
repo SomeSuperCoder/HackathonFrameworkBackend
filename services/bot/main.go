@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	b := &bot.Bot{}
+	b := bot.NewBot()
 	b.Start(context.Background())
 }
