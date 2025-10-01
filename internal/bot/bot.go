@@ -38,7 +38,7 @@ func (b *Bot) Start(ctx context.Context) {
 	botToken := os.Getenv("TELEGRAM_TOKEN")
 
 	// Create a bot
-	b.Bot, err = telego.NewBot(botToken, telego.WithDefaultDebugLogger())
+	b.Bot, err = telego.NewBot(botToken, telego.WithDefaultLogger(false, true))
 	utils.CheckErrorDeadly(err, "Faileed to create b.Bot")
 
 	// Create handler

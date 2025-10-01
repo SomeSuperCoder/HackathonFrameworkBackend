@@ -13,7 +13,7 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func (b *Bot) EnterEmail(ctx *th.Context, update telego.Update) error {
+func (b *Bot) EnterBirthdate(ctx *th.Context, update telego.Update) error {
 	// Mutex stuff
 	b.StateMutex.Lock()
 	defer b.StateMutex.Unlock()
@@ -51,7 +51,15 @@ func (b *Bot) EnterEmail(ctx *th.Context, update telego.Update) error {
 	return nil
 }
 
-func (b *Bot) EnterEmailPredicate(ctx context.Context, update telego.Update) bool {
+func (b *Bot) InvalidEnterBirthdate(ctx *th.Context, update telego.Update) error {
+	b.Bot.SendMessage(ctx, tu.Message(
+		tu.ID(update.Message.Chat.ID),
+		"Некорректная дата рождения\\! Пример даты рождения: `31.12.2025`",
+	).WithParseMode("MarkdownV2"))
+	return nil
+}
+
+func (b *Bot) EnterBirthdatePredicate(ctx context.Context, update telego.Update) bool {
 	b.StateMutex.RLock()
 	defer b.StateMutex.RUnlock()
 	stateUnit := b.State.GetState(statemachine.StateKey(update.Message.From.ID)).State
