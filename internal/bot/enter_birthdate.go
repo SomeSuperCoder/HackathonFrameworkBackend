@@ -11,6 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func (b *Bot) EnterBirthdate(ctx *th.Context, update telego.Update) error {
@@ -35,6 +36,7 @@ func (b *Bot) EnterBirthdate(ctx *th.Context, update telego.Update) error {
 		Name:      data.Name,
 		Birthdate: data.Birthdate,
 		Role:      models.Participant,
+		Team:      bson.NilObjectID,
 		CratedAt:  time.Now(),
 	}
 	err := b.UserRepo.CreateUser(ctx, newUser)
