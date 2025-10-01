@@ -11,7 +11,6 @@ import (
 	statemachine "github.com/SomeSuperCoder/global-chat/internal/bot/state_machine"
 	botstates "github.com/SomeSuperCoder/global-chat/internal/bot/states"
 	"github.com/SomeSuperCoder/global-chat/models"
-	"github.com/SomeSuperCoder/global-chat/utils"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
@@ -146,7 +145,5 @@ func main() {
 		return stateUnit == STATE_ENTER_BIRTHDATE
 	}, th.TextMatches(regexp.MustCompile(botregexps.BIRTHDATE_PATTERN)))
 
-	defer func() { _ = b.Handler.Stop() }()
-	err := b.Handler.Start()
-	utils.CheckErrorDeadly(err, "Failed to start bot Handler")
+	b.Start()
 }

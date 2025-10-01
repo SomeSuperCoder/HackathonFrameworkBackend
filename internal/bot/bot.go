@@ -23,6 +23,12 @@ type Bot struct {
 	UserRepo   *repository.UserRepo
 }
 
+func (b *Bot) Start() {
+	defer func() { _ = b.Handler.Stop() }()
+	err := b.Handler.Start()
+	utils.CheckErrorDeadly(err, "Failed to start bot Handler")
+}
+
 func NewBot() *Bot {
 	newBot := &Bot{}
 	ctx := context.Background()
