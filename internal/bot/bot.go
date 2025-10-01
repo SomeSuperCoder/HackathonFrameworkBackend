@@ -16,6 +16,8 @@ import (
 )
 
 type Bot struct {
+	client     *mongo.Client
+	database   *mongo.Database
 	Bot        *telego.Bot
 	Handler    *th.BotHandler
 	State      *statemachine.BotState
@@ -23,45 +25,41 @@ type Bot struct {
 	UserRepo   *repository.UserRepo
 }
 
-func (b *Bot) Start() {
-	defer func() { _ = b.Handler.Stop() }()
-	err := b.Handler.Start()
-	utils.CheckErrorDeadly(err, "Failed to start bot Handler")
-}
-
-func NewBot() *Bot {
-	newBot := &Bot{}
-	ctx := context.Background()
-
+func (b *Bot) Start(ctx context.Context) {
 	// Load .env
 	err := godotenv.Load()
 	utils.CheckErrorDeadly(err, "Failedd to load .env")
 	botToken := os.Getenv("TELEGRAM_TOKEN")
 
-	// Create newBot.Bot
-	newBot.Bot, err = telego.NewBot(botToken, telego.WithDefaultDebugLogger())
-	utils.CheckErrorDeadly(err, "Faileed to create newBot.Bot")
+	// Create a bot
+	b.Bot, err = telego.NewBot(botToken, telego.WithDefaultDebugLogger())
+	utils.CheckErrorDeadly(err, "Faileed to create b.Bot")
 
 	// Create handler
-	updates, _ := newBot.Bot.UpdatesViaLongPolling(ctx, nil)
-	defer newBot.Bot.StopPoll(ctx, nil)
-	newBot.Handler, _ = th.NewBotHandler(newBot.Bot, updates)
+	updates, _ := b.Bot.UpdatesViaLongPolling(ctx, nil)
+	defer b.Bot.StopPoll(ctx, nil)
+	b.Handler, _ = th.NewBotHandler(b.Bot, updates)
+
+	// Register handlers
+	b.registerHandlers()
 
 	// Connect to MongoDB
 	connectionString := "mongodb://localhost:27017"
-	client, err := mongo.Connect(options.Client().ApplyURI(connectionString))
+	b.client, err = mongo.Connect(options.Client().ApplyURI(connectionString))
 	utils.CheckErrorDeadly(err, "Failed to conneect to MongoDB")
-	defer client.Disconnect(ctx)
-	database := client.Database("hackathonframework")
+	defer b.client.Disconnect(ctx)
+	b.database = b.client.Database("hackathonframework")
 
 	// Init database repos
-	newBot.UserRepo = &repository.UserRepo{
-		Database: database,
+	b.UserRepo = &repository.UserRepo{
+		Database: b.database,
 	}
 
 	// Init state manager
-	newBot.State = statemachine.NewBotState()
-	newBot.StateMutex = &sync.RWMutex{}
+	b.State = statemachine.NewBotState()
+	b.StateMutex = &sync.RWMutex{}
 
-	return newBot
+	defer func() { _ = b.Handler.Stop() }()
+	err = b.Handler.Start()
+	utils.CheckErrorDeadly(err, "Failed to start bot Handler")
 }
