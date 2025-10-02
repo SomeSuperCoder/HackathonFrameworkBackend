@@ -34,16 +34,14 @@ func (h *CaseHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-
-	// Parse
-	parsedID, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	// Load data
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
-	case_, err := h.Repo.GetByID(r.Context(), parsedID)
+	case_, err := h.Repo.GetByID(r.Context(), parsedId)
 	if utils.CheckGetFromDB(w, err) {
 		return
 	}
@@ -102,12 +100,9 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -120,7 +115,7 @@ func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Description string `json:"description" bson:"description" validate:"omitempty,admin"`
 		ImageURI    string `json:"image_uri" bson:"image_uri" validate:"omitempty,admin,url"`
 	}
-	err = json.NewDecoder(r.Body).Decode(&request)
+	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
 		return
 	}
@@ -144,12 +139,9 @@ func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h *CaseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -164,7 +156,7 @@ func (h *CaseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	err = h.Repo.Delete(r.Context(), parsedId)
+	err := h.Repo.Delete(r.Context(), parsedId)
 	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
 		return
 	}

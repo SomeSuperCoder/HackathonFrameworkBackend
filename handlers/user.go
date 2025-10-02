@@ -70,16 +70,14 @@ func (h *UserHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	userID := r.PathValue("id")
-
-	// Parse the user id
-	parsedUserID, err := bson.ObjectIDFromHex(userID)
-	if err != nil {
-		http.Error(w, "Invalid user ID provided", http.StatusBadRequest)
+	// Load data
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
-	user, err := h.Repo.GetByID(r.Context(), parsedUserID)
+	user, err := h.Repo.GetByID(r.Context(), parsedId)
 	getCommon(user, err, w)
 }
 
@@ -106,12 +104,9 @@ func getCommon(user *models.User, err error, w http.ResponseWriter) {
 
 func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -125,7 +120,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Role      models.UserRole `json:"role" bson:"role,omitempty" validate:"omitempty,admin,oneof=0 1 2"`
 		Team      bson.ObjectID   `json:"team" bson:"team,omitempty" validate:"omitempty,self"`
 	}
-	err = json.NewDecoder(r.Body).Decode(&request)
+	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
 		return
 	}
@@ -149,12 +144,9 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -169,7 +161,7 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	err = h.Repo.Delete(r.Context(), parsedId)
+	err := h.Repo.Delete(r.Context(), parsedId)
 	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
 		return
 	}

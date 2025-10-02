@@ -73,12 +73,9 @@ func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 
 func (h *TeamHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -99,12 +96,9 @@ func (h *TeamHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 func (h *TeamHandler) GetMembers(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -169,12 +163,9 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -222,12 +213,9 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h *TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// Load data
-	id := r.PathValue("id")
-
-	// Parse
-	parsedId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
@@ -242,7 +230,7 @@ func (h *TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	err = h.Repo.Delete(r.Context(), parsedId)
+	err := h.Repo.Delete(r.Context(), parsedId)
 	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
 		return
 	}
