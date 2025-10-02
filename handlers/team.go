@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
+	"github.com/SomeSuperCoder/global-chat/internal/validators"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
 	"github.com/SomeSuperCoder/global-chat/utils"
-	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -25,14 +25,6 @@ type TeamsResponse struct {
 	Teams      []models.Team `json:"teams"`
 	TotalCount int64         `json:"count"`
 }
-
-func NewValidate() *validator.Validate {
-	validate := validator.New()
-	validate.RegisterValidation("grades", models.ValidateGrades)
-	return validate
-}
-
-var validate = NewValidate()
 
 func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 	// Get data
@@ -156,7 +148,8 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate
-	err = validate.Struct(request)
+	tv := validators.NewTeamValidator(userAuth, nil)
+	err = tv.ValidateRequest(&request)
 	if utils.CheckJSONValidError(w, err) {
 		return
 	}
@@ -202,46 +195,23 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check access
-	if userAuth.Role == models.Admin || userAuth.Role == models.Judge || parsedId == userAuth.Team {
-	} else {
-		http.Error(w, "Access denied", http.StatusForbidden)
-		return
-	}
-
 	// Parse
 	var request struct {
-		Name            string        `json:"name" bson:"name,omitempty" validate:"omitempty,min=1,max=20"`
-		Leader          bson.ObjectID `json:"leader" bson:"leader,omitempty"`
-		Repos           []string      `json:"repos" bson:"repos,omitempty" validate:"omitempty,dive,url"`
-		PresentationURI string        `json:"presentation_uri" bson:"presentation_uri,omitempty" validate:"omitempty,url"`
-		Grades          models.Grades `json:"grades" bson:"grades,omitempty" validate:"grades"`
+		Name            string        `json:"name" bson:"name,omitempty" validate:"omitempty,owner,min=1,max=20"`
+		Leader          bson.ObjectID `json:"leader" bson:"leader,omitempty" validate:"omitempty,owner"`
+		Repos           []string      `json:"repos" bson:"repos,omitempty" validate:"omitempty,owner,dive,url"`
+		PresentationURI string        `json:"presentation_uri" bson:"presentation_uri,omitempty" validate:"omitempty,owner,url"`
+		Grades          models.Grades `json:"grades" bson:"grades,omitempty" validate:"omitempty,judge,grades"`
 	}
 	err = json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
 		return
 	}
 
+	tv := validators.NewTeamValidator(userAuth, team)
 	// Validate
-	err = validate.Struct(request)
+	err = tv.ValidateRequest(&request)
 	if utils.CheckJSONValidError(w, err) {
-		return
-	}
-
-	// Extra access checks
-	checks := []utils.Check{
-		{
-			Condition:   request.Leader != bson.NilObjectID,
-			Requirement: team.Leader == userAuth.ID,
-			Message:     "Only the current leader can set the new one",
-		},
-		{
-			Condition:   request.Grades != nil,
-			Requirement: userAuth.Role == models.Admin || userAuth.Role == models.Judge,
-			Message:     "You do not have the right to change grades",
-		},
-	}
-	if utils.MultiAccessCheck(w, checks) {
 		return
 	}
 
