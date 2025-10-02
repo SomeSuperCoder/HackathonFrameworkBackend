@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SomeSuperCoder/global-chat/internal/middleware"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
 	"github.com/SomeSuperCoder/global-chat/utils"
@@ -105,4 +106,35 @@ func getCommon(user *models.User, err error, w http.ResponseWriter) {
 	}
 
 	fmt.Fprintln(w, string(serializedUser))
+}
+
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	// Load data
+	id := r.PathValue("id")
+
+	// Parse
+	parsedId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+		return
+	}
+
+	// Get auth data
+	userAuth := middleware.ExtractUserAuth(r)
+
+	// Check access
+	if userAuth.Role == models.Admin || parsedId == userAuth.ID {
+	} else {
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+
+	// Do work
+	err = h.Repo.Delete(r.Context(), parsedId)
+	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
+		return
+	}
+
+	// Respond
+	fmt.Fprintf(w, "Successfully deleted")
 }

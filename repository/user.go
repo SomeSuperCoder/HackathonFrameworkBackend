@@ -77,3 +77,14 @@ func (r *UserRepo) getCommon(ctx context.Context, filter bson.M) (*models.User, 
 	return &user, err
 
 }
+
+func (r *UserRepo) Delete(ctx context.Context, id bson.ObjectID) error {
+	_, err := r.Users.DeleteOne(ctx, bson.M{
+		"_id": id,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

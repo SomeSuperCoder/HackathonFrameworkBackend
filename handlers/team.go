@@ -217,7 +217,6 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Do work
 	err = h.Repo.Update(r.Context(), parsedId, request)
-
 	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
 		return
 	}
@@ -249,7 +248,6 @@ func (h *TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// Do work
 	err = h.Repo.Delete(r.Context(), parsedId)
-
 	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
 		return
 	}

@@ -47,6 +47,7 @@ func loadAuthRoutes(db *mongo.Database) http.Handler {
 	userMux.HandleFunc("GET /", usersHandler.GetPaged)
 	userMux.HandleFunc("GET /{id}", usersHandler.GetByID)
 	userMux.HandleFunc("GET /by-name/{username}", usersHandler.GetByUsername)
+	userMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(usersHandler.Delete, db))
 
 	return http.StripPrefix("/users", userMux)
 }
