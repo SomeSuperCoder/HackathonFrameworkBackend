@@ -33,6 +33,7 @@ func loadTeamRoutes(db *mongo.Database) http.Handler {
 	teamMux.HandleFunc("GET /{id}/members", teamsHandler.GetMembers)
 	teamMux.HandleFunc("POST /", middleware.AuthMiddleware(teamsHandler.Create, db))
 	teamMux.HandleFunc("PATCH /{id}", middleware.AuthMiddleware(teamsHandler.Update, db))
+	teamMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(teamsHandler.Delete, db))
 
 	return http.StripPrefix("/teams", teamMux)
 }
