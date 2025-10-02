@@ -4,15 +4,67 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
+	"github.com/SomeSuperCoder/global-chat/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type UserHandler struct {
 	Repo *repository.UserRepo
+}
+
+type UsersResponse struct {
+	Users      []models.User `json:"users"`
+	TotalCount int64         `json:"count"`
+}
+
+func (h *UserHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
+	// Get data
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
+
+	// Validate
+	if page == "" {
+		http.Error(w, "No page number provided", http.StatusBadRequest)
+		return
+	}
+	if limit == "" {
+		http.Error(w, "No limit number provided", http.StatusBadRequest)
+		return
+	}
+
+	// Parse
+	pageNumber, err := strconv.Atoi(page)
+	if utils.CheckError(w, err, "Invalid page number", http.StatusBadRequest) {
+		return
+	}
+
+	limitNumber, err := strconv.Atoi(limit)
+	if utils.CheckError(w, err, "Invalid limit number", http.StatusBadRequest) {
+		return
+	}
+
+	// Do work
+	users, totalCount, err := h.Repo.FindPaged(r.Context(), int64(pageNumber), int64(limitNumber))
+	if utils.CheckError(w, err, "Failed to fetch messages", http.StatusInternalServerError) {
+		return
+	}
+
+	// Respond
+	result := &UsersResponse{
+		Users:      users,
+		TotalCount: totalCount,
+	}
+	resultString, err := json.Marshal(result)
+	if utils.CheckError(w, err, "Failed to serialize JSON", http.StatusInternalServerError) {
+		return
+	}
+
+	fmt.Fprintln(w, string(resultString))
 }
 
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {

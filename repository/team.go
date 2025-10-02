@@ -24,7 +24,7 @@ func NewTeamRepo(database *mongo.Database) *TeamRepo {
 }
 
 func (r *TeamRepo) FindPaged(ctx context.Context, page, limit int64) ([]models.Team, int64, error) {
-	var messages = []models.Team{}
+	var teams = []models.Team{}
 
 	// Set pagination options
 	skip := (page - 1) * limit
@@ -40,16 +40,16 @@ func (r *TeamRepo) FindPaged(ctx context.Context, page, limit int64) ([]models.T
 	}
 	defer cursor.Close(ctx)
 
-	// Extract messages
-	err = cursor.All(ctx, &messages)
+	// Extract records
+	err = cursor.All(ctx, &teams)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	// Get total message count
+	// Get total count
 	count, err := r.Teams.CountDocuments(ctx, bson.M{})
 
-	return messages, count, err
+	return teams, count, err
 }
 
 func (r *TeamRepo) Create(ctx context.Context, team *models.Team) error {

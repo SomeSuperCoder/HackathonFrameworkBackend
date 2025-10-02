@@ -21,9 +21,33 @@ func NewUserRepo(database *mongo.Database) *UserRepo {
 	}
 }
 
-type UserAuth struct {
-	Username string
-	UserID   bson.ObjectID
+func (r *UserRepo) FindPaged(ctx context.Context, page, limit int64) ([]models.User, int64, error) {
+	var users = []models.User{}
+
+	// Set pagination options
+	skip := (page - 1) * limit
+	opts := options.Find()
+	opts.SetLimit(limit)
+	opts.SetSkip(skip)
+	opts.SetSort(bson.M{"created_at": -1})
+
+	// Init a cursor
+	cursor, err := r.Users.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	// Extract records
+	err = cursor.All(ctx, &users)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Get total count
+	count, err := r.Users.CountDocuments(ctx, bson.M{})
+
+	return users, count, err
 }
 
 func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
