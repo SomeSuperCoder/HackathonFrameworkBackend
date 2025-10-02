@@ -115,7 +115,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name      string          `json:"name" bson:"name,omitempty" validate:"omitempty,self,min=1,max=20"`
+		Name      string          `json:"name" bson:"name,omitempty" validate:"omitempty,self,min=1,max=40"`
 		Birthdate time.Time       `json:"birthdate" bson:"birthdate,omitempty" validate:"omitempty,self"`
 		Role      models.UserRole `json:"role" bson:"role,omitempty" validate:"omitempty,admin,oneof=0 1 2"`
 		Team      bson.ObjectID   `json:"team" bson:"team,omitempty" validate:"omitempty,self"`

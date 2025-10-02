@@ -68,7 +68,7 @@ func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name        string    `json:"name" bson:"name,omitempty" validate:"required,min=1,max=20"`
+		Name        string    `json:"name" bson:"name,omitempty" validate:"required,min=1,max=40"`
 		Description string    `json:"description" bson:"description" validate:"required"`
 		Time        time.Time `json:"time" bson:"time" validate:"required"`
 	}
@@ -112,7 +112,7 @@ func (h *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name        string    `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,min=1,max=20"`
+		Name        string    `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,min=1,max=40"`
 		Description string    `json:"description" bson:"description,omitempty" validate:"omitempty,admin,omitempty"`
 		Time        time.Time `json:"time" bson:"time,omitempty" validate:"omitempty,admin,omitempty"`
 	}

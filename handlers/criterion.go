@@ -67,7 +67,7 @@ func (h *CriterionHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Text string `json:"text" bson:"text" validate:"required,min=1,max=20"`
+		Text string `json:"text" bson:"text" validate:"required,min=1,max=40"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
@@ -107,7 +107,7 @@ func (h *CriterionHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Text string `json:"text" bson:"text,omitempty" validate:"omitempty,admin,required,min=1,max=20"`
+		Text string `json:"text" bson:"text,omitempty" validate:"omitempty,admin,required,min=1,max=40"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {

@@ -129,7 +129,7 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name string `json:"name" bson:"name,omitempty" validate:"omitempty,min=1,max=20"`
+		Name string `json:"name" bson:"name,omitempty" validate:"omitempty,min=1,max=40"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
@@ -183,7 +183,7 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name            string        `json:"name" bson:"name,omitempty" validate:"omitempty,owner,min=1,max=20"`
+		Name            string        `json:"name" bson:"name,omitempty" validate:"omitempty,owner,min=1,max=40"`
 		Leader          bson.ObjectID `json:"leader" bson:"leader,omitempty" validate:"omitempty,owner"`
 		Repos           []string      `json:"repos" bson:"repos,omitempty" validate:"omitempty,owner,dive,url"`
 		PresentationURI string        `json:"presentation_uri" bson:"presentation_uri,omitempty" validate:"omitempty,owner,url"`

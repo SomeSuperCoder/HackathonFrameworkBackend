@@ -67,7 +67,7 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name        string `json:"name" bson:"name" validate:"required,min=1,max=20"`
+		Name        string `json:"name" bson:"name" validate:"required,min=1,max=40"`
 		Description string `json:"description" bson:"description" validate:"required"`
 		ImageURI    string `json:"image_uri" bson:"image_uri" validate:"omitempty,url"`
 	}
@@ -111,7 +111,7 @@ func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name        string `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,admin,min=1,max=20"`
+		Name        string `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,admin,min=1,max=40"`
 		Description string `json:"description" bson:"description,omitempty" validate:"omitempty,admin,omitempty,admin"`
 		ImageURI    string `json:"image_uri" bson:"image_uri,omitempty" validate:"omitempty,admin,omitempty,admin,url"`
 	}
