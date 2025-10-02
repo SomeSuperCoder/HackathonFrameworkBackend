@@ -24,30 +24,31 @@ func loadRoutes(db *mongo.Database) http.Handler {
 
 func loadTeamRoutes(db *mongo.Database) http.Handler {
 	teamMux := http.NewServeMux()
-	teamsHandler := &handlers.TeamHandler{
+	teamHandler := &handlers.TeamHandler{
 		Repo: repository.NewTeamRepo(db),
 	}
 
-	teamMux.HandleFunc("GET /", teamsHandler.GetPaged)
-	teamMux.HandleFunc("GET /{id}", teamsHandler.GetByID)
-	teamMux.HandleFunc("GET /{id}/members", teamsHandler.GetMembers)
-	teamMux.HandleFunc("POST /", middleware.AuthMiddleware(teamsHandler.Create, db))
-	teamMux.HandleFunc("PATCH /{id}", middleware.AuthMiddleware(teamsHandler.Update, db))
-	teamMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(teamsHandler.Delete, db))
+	teamMux.HandleFunc("GET /", teamHandler.GetPaged)
+	teamMux.HandleFunc("GET /{id}", teamHandler.GetByID)
+	teamMux.HandleFunc("GET /{id}/members", teamHandler.GetMembers)
+	teamMux.HandleFunc("POST /", middleware.AuthMiddleware(teamHandler.Create, db))
+	teamMux.HandleFunc("PATCH /{id}", middleware.AuthMiddleware(teamHandler.Update, db))
+	teamMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(teamHandler.Delete, db))
 
 	return http.StripPrefix("/teams", teamMux)
 }
 
 func loadAuthRoutes(db *mongo.Database) http.Handler {
 	userMux := http.NewServeMux()
-	usersHandler := &handlers.UserHandler{
+	userHandler := &handlers.UserHandler{
 		Repo: repository.NewUserRepo(db),
 	}
 
-	userMux.HandleFunc("GET /", usersHandler.GetPaged)
-	userMux.HandleFunc("GET /{id}", usersHandler.GetByID)
-	userMux.HandleFunc("GET /by-name/{username}", usersHandler.GetByUsername)
-	userMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(usersHandler.Delete, db))
+	userMux.HandleFunc("GET /", userHandler.GetPaged)
+	userMux.HandleFunc("GET /{id}", userHandler.GetByID)
+	userMux.HandleFunc("GET /by-name/{username}", userHandler.GetByUsername)
+	userMux.HandleFunc("PATCH /{id}", middleware.AuthMiddleware(userHandler.Update, db))
+	userMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(userHandler.Delete, db))
 
 	return http.StripPrefix("/users", userMux)
 }

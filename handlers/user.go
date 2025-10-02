@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
+	"github.com/SomeSuperCoder/global-chat/internal/validators"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
 	"github.com/SomeSuperCoder/global-chat/utils"
@@ -106,6 +108,49 @@ func getCommon(user *models.User, err error, w http.ResponseWriter) {
 	}
 
 	fmt.Fprintln(w, string(serializedUser))
+}
+
+func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
+	// Load data
+	id := r.PathValue("id")
+
+	// Parse
+	parsedId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, "Invalid ID provided", http.StatusBadRequest)
+		return
+	}
+
+	// Get auth data
+	userAuth := middleware.ExtractUserAuth(r)
+
+	// Parse
+	var request struct {
+		Name      string          `json:"name" bson:"name,omitempty" validate:"omitempty,self,min=1,max=20"`
+		Birthdate time.Time       `json:"birthdate" bson:"birthdate,omitempty" validate:"omitempty,self"`
+		Role      models.UserRole `json:"role" bson:"role,omitempty" validate:"omitempty,admin,oneof=0 1 2"`
+		Team      bson.ObjectID   `json:"team" bson:"team,omitempty" validate:"omitempty,self"`
+	}
+	err = json.NewDecoder(r.Body).Decode(&request)
+	if utils.CheckJSONError(w, err) {
+		return
+	}
+
+	tv := validators.NewUserValidator(userAuth, parsedId)
+	// Validate
+	err = tv.ValidateRequest(&request)
+	if utils.CheckJSONValidError(w, err) {
+		return
+	}
+
+	// Do work
+	err = h.Repo.Update(r.Context(), parsedId, request)
+	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
+		return
+	}
+
+	// Respond
+	fmt.Fprintf(w, "Successfully updated")
 }
 
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {

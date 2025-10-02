@@ -78,6 +78,16 @@ func (r *UserRepo) getCommon(ctx context.Context, filter bson.M) (*models.User, 
 
 }
 
+func (r *UserRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
+	res := r.Users.FindOneAndUpdate(ctx, bson.M{
+		"_id": id,
+	}, bson.M{
+		"$set": update,
+	})
+
+	return res.Err()
+}
+
 func (r *UserRepo) Delete(ctx context.Context, id bson.ObjectID) error {
 	_, err := r.Users.DeleteOne(ctx, bson.M{
 		"_id": id,
