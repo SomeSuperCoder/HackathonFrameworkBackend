@@ -9,7 +9,6 @@ import (
 
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
-	"github.com/sirupsen/logrus"
 	initdata "github.com/telegram-mini-apps/init-data-golang"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -37,7 +36,6 @@ func Authorize(r *http.Request, db *mongo.Database) (*models.User, error, int) {
 		return nil, fmt.Errorf("Failed to parse initdata: %w", err), http.StatusBadRequest
 	}
 	username := initDataParsed.User.Username
-	logrus.Info(username)
 
 	user, err := repo.GetByUsername(r.Context(), username)
 	if err != nil {
