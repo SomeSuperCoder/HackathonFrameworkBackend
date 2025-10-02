@@ -75,7 +75,6 @@ func (r *UserRepo) getCommon(ctx context.Context, filter bson.M) (*models.User, 
 	}
 
 	return &user, err
-
 }
 
 func (r *UserRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {

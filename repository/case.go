@@ -55,7 +55,6 @@ func (r *CaseRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Case,
 	}
 
 	return &case_, err
-
 }
 
 func (r *CaseRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
