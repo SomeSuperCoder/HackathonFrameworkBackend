@@ -13,19 +13,19 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type CaseHandler struct {
-	Repo *repository.CaseRepo
+type CriterionHandler struct {
+	Repo *repository.CriterionRepo
 }
 
-func (h *CaseHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *CriterionHandler) Get(w http.ResponseWriter, r *http.Request) {
 	// Do work
-	cases, err := h.Repo.Find(r.Context())
+	criteria, err := h.Repo.Find(r.Context())
 	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
 		return
 	}
 
 	// Respond
-	resultString, err := json.Marshal(&cases)
+	resultString, err := json.Marshal(&criteria)
 	if utils.CheckError(w, err, "Failed to serialize JSON", http.StatusInternalServerError) {
 		return
 	}
@@ -33,7 +33,7 @@ func (h *CaseHandler) Get(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(resultString))
 }
 
-func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+func (h *CriterionHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	// Load data
 	var parsedId bson.ObjectID
 	var exit bool
@@ -41,12 +41,12 @@ func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	case_, err := h.Repo.GetByID(r.Context(), parsedId)
+	criterion, err := h.Repo.GetByID(r.Context(), parsedId)
 	if utils.CheckGetFromDB(w, err) {
 		return
 	}
 
-	serialized, err := json.Marshal(&case_)
+	serialized, err := json.Marshal(&criterion)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to marshal JSON: %s", err.Error()), http.StatusInternalServerError)
 		return
@@ -55,7 +55,7 @@ func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(serialized))
 }
 
-func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *CriterionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Get auth data
 	userAuth := middleware.ExtractUserAuth(r)
 
@@ -67,9 +67,7 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name        string `json:"name" bson:"name" validate:"required,min=1,max=20"`
-		Description string `json:"description" bson:"description" validate:"required"`
-		ImageURI    string `json:"image_uri" bson:"image_uri" validate:"omitempty,url"`
+		Text string `json:"text" bson:"text" validate:"required,min=1,max=20"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
@@ -84,10 +82,8 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	err = h.Repo.Create(r.Context(), &models.Case{
-		Name:        request.Name,
-		Description: request.Description,
-		ImageURI:    request.ImageURI,
+	err = h.Repo.Create(r.Context(), &models.Criterion{
+		Text: request.Text,
 	})
 
 	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {
@@ -98,7 +94,7 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Successfully created")
 }
 
-func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *CriterionHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// Load data
 	var parsedId bson.ObjectID
 	var exit bool
@@ -111,9 +107,7 @@ func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name        string `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,admin,min=1,max=20"`
-		Description string `json:"description" bson:"description,omitempty" validate:"omitempty,admin,omitempty,admin"`
-		ImageURI    string `json:"image_uri" bson:"image_uri,omitempty" validate:"omitempty,admin,omitempty,admin,url"`
+		Text string `json:"text" bson:"text,omitempty" validate:"omitempty,admin,required,min=1,max=20"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {
@@ -137,7 +131,7 @@ func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Successfully updated")
 }
 
-func (h *CaseHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *CriterionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// Load data
 	var parsedId bson.ObjectID
 	var exit bool

@@ -20,6 +20,7 @@ func loadRoutes(db *mongo.Database) http.Handler {
 	mux.Handle("/teams/", loadTeamRoutes(db))
 	mux.Handle("/cases/", loadCaseRoutes(db))
 	mux.Handle("/events/", loadEventRoutes(db))
+	mux.Handle("/criteria/", loadCriterionRoutes(db))
 
 	return middleware.LoggerMiddleware(mux)
 }
@@ -52,6 +53,21 @@ func loadEventRoutes(db *mongo.Database) http.Handler {
 	eventMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(eventHandler.Delete, db))
 
 	return http.StripPrefix("/events", eventMux)
+}
+
+func loadCriterionRoutes(db *mongo.Database) http.Handler {
+	criterionMux := http.NewServeMux()
+	criterionHandler := &handlers.CriterionHandler{
+		Repo: repository.NewCriterionRepo(db),
+	}
+
+	criterionMux.HandleFunc("GET /", criterionHandler.Get)
+	criterionMux.HandleFunc("GET /{id}", criterionHandler.GetByID)
+	criterionMux.HandleFunc("POST /", middleware.AuthMiddleware(criterionHandler.Create, db))
+	criterionMux.HandleFunc("PATCH /{id}", middleware.AuthMiddleware(criterionHandler.Update, db))
+	criterionMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(criterionHandler.Delete, db))
+
+	return http.StripPrefix("/criteria", criterionMux)
 }
 
 func loadTeamRoutes(db *mongo.Database) http.Handler {
