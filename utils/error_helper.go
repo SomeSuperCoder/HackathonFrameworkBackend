@@ -6,7 +6,20 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
+
+func CheckGetFromDB(w http.ResponseWriter, err error) bool {
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			http.Error(w, fmt.Sprintf("Not found: %s", err.Error()), http.StatusNotFound)
+			return true
+		}
+		http.Error(w, fmt.Sprintf("Failed to get from DB: %s", err.Error()), http.StatusInternalServerError)
+		return true
+	}
+	return false
+}
 
 func CheckJSONError(w http.ResponseWriter, err error) bool {
 	return CheckError(w, err, "Failed to parse JSON", http.StatusBadRequest)

@@ -13,7 +13,6 @@ import (
 	"github.com/SomeSuperCoder/global-chat/repository"
 	"github.com/SomeSuperCoder/global-chat/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type UserHandler struct {
@@ -53,7 +52,7 @@ func (h *UserHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 
 	// Do work
 	users, totalCount, err := h.Repo.FindPaged(r.Context(), int64(pageNumber), int64(limitNumber))
-	if utils.CheckError(w, err, "Failed to fetch messages", http.StatusInternalServerError) {
+	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
 		return
 	}
 
@@ -92,12 +91,7 @@ func (h *UserHandler) GetByUsername(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCommon(user *models.User, err error, w http.ResponseWriter) {
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			http.Error(w, fmt.Sprintf("Not found: %s", err.Error()), http.StatusNotFound)
-			return
-		}
-		http.Error(w, fmt.Sprintf("Failed to get from DB: %s", err.Error()), http.StatusInternalServerError)
+	if utils.CheckGetFromDB(w, err) {
 		return
 	}
 

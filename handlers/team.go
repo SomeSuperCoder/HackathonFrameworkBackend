@@ -54,7 +54,7 @@ func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 
 	// Do work
 	teams, totalCount, err := h.Repo.FindPaged(r.Context(), int64(pageNumber), int64(limitNumber))
-	if utils.CheckError(w, err, "Failed to fetch messages", http.StatusInternalServerError) {
+	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
 		return
 	}
 
@@ -84,12 +84,7 @@ func (h *TeamHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	// Do work
 	team, err := h.Repo.GetByID(r.Context(), parsedId)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			http.Error(w, fmt.Sprintf("Not found: %s", err.Error()), http.StatusNotFound)
-			return
-		}
-		http.Error(w, fmt.Sprintf("Failed to get from DB: %s", err.Error()), http.StatusInternalServerError)
+	if utils.CheckGetFromDB(w, err) {
 		return
 	}
 

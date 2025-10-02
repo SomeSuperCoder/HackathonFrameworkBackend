@@ -34,7 +34,7 @@ func NewBot() *Bot {
 func (b *Bot) Start(ctx context.Context) {
 	// Load .env
 	err := godotenv.Load()
-	utils.CheckErrorDeadly(err, "Failedd to load .env")
+	utils.CheckErrorDeadly(err, "Failed to load .env")
 	botToken := os.Getenv("TELEGRAM_TOKEN")
 
 	// Create a bot

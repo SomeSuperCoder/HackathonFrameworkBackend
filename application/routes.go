@@ -16,10 +16,26 @@ func loadRoutes(db *mongo.Database) http.Handler {
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "OK")
 	})
-	mux.Handle("/users/", loadAuthRoutes(db))
+	mux.Handle("/users/", loadUserRoutes(db))
 	mux.Handle("/teams/", loadTeamRoutes(db))
+	mux.Handle("/cases/", loadCaseRoutes(db))
 
 	return middleware.LoggerMiddleware(mux)
+}
+
+func loadCaseRoutes(db *mongo.Database) http.Handler {
+	caseMux := http.NewServeMux()
+	caseHandler := &handlers.CaseHandler{
+		Repo: repository.NewCaseRepo(db),
+	}
+
+	caseMux.HandleFunc("GET /", caseHandler.Get)
+	caseMux.HandleFunc("GET /{id}", caseHandler.GetByID)
+	caseMux.HandleFunc("POST /", middleware.AuthMiddleware(caseHandler.Create, db))
+	caseMux.HandleFunc("PATCH /{id}", middleware.AuthMiddleware(caseHandler.Update, db))
+	caseMux.HandleFunc("DELETE /{id}", middleware.AuthMiddleware(caseHandler.Delete, db))
+
+	return http.StripPrefix("/cases", caseMux)
 }
 
 func loadTeamRoutes(db *mongo.Database) http.Handler {
@@ -38,7 +54,7 @@ func loadTeamRoutes(db *mongo.Database) http.Handler {
 	return http.StripPrefix("/teams", teamMux)
 }
 
-func loadAuthRoutes(db *mongo.Database) http.Handler {
+func loadUserRoutes(db *mongo.Database) http.Handler {
 	userMux := http.NewServeMux()
 	userHandler := &handlers.UserHandler{
 		Repo: repository.NewUserRepo(db),
