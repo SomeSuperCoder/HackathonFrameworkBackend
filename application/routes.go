@@ -16,6 +16,7 @@ func loadRoutes(db *mongo.Database) http.Handler {
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "OK")
 	})
+	mux.Handle("GET /me", middleware.AuthMiddleware(handlers.MeHandler, db))
 	mux.Handle("/users/", loadUserRoutes(db))
 	mux.Handle("/teams/", loadTeamRoutes(db))
 	mux.Handle("/cases/", loadCaseRoutes(db))
