@@ -37,7 +37,6 @@ func (b *Bot) EnterBirthdate(ctx *th.Context, update telego.Update) error {
 		Birthdate: data.Birthdate,
 		Role:      models.Participant,
 		Team:      bson.NilObjectID,
-		CratedAt:  time.Now(),
 	}
 	err := b.UserRepo.Create(ctx, newUser)
 

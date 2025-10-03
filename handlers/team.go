@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
 	"github.com/SomeSuperCoder/global-chat/internal/validators"
@@ -150,7 +149,6 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Repos:           make([]string, 0),
 		PresentationURI: "",
 		Grades:          make(models.Grades),
-		CratedAt:        time.Now(),
 	})
 
 	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {

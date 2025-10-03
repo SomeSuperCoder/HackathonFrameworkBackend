@@ -21,8 +21,6 @@ type User struct {
 	Birthdate time.Time     `bson:"birthdate" json:"birthdate"`
 	Role      UserRole      `bson:"role" json:"role"`
 	Team      bson.ObjectID `bson:"team" json:"team"`
-	// ================
-	CratedAt time.Time `bson:"created_at" json:"created_at"`
 	// TG related
 	Username string `bson:"username" json:"username"`
 	ChatID   int64  `bson:"chat_id" json:"chat_id"`
