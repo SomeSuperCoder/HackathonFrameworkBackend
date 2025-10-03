@@ -17,7 +17,8 @@ import (
 )
 
 type TeamHandler struct {
-	Repo *repository.TeamRepo
+	TeamRepo *repository.TeamRepo
+	UserRepo *repository.UserRepo
 }
 
 type TeamsResponse struct {
@@ -52,7 +53,7 @@ func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	teams, totalCount, err := h.Repo.FindPaged(r.Context(), int64(pageNumber), int64(limitNumber))
+	teams, totalCount, err := h.TeamRepo.FindPaged(r.Context(), int64(pageNumber), int64(limitNumber))
 	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
 		return
 	}
@@ -79,7 +80,7 @@ func (h *TeamHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	team, err := h.Repo.GetByID(r.Context(), parsedId)
+	team, err := h.TeamRepo.GetByID(r.Context(), parsedId)
 	if utils.CheckGetFromDB(w, err) {
 		return
 	}
@@ -102,7 +103,7 @@ func (h *TeamHandler) GetMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	members, err := h.Repo.GetMembers(r.Context(), parsedId)
+	members, err := h.TeamRepo.GetMembers(r.Context(), parsedId)
 	if utils.CheckError(w, err, "Failed to get members", http.StatusInternalServerError) {
 		return
 	}
@@ -143,17 +144,19 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	err = h.Repo.Create(r.Context(), &models.Team{
+	createdID, err := h.TeamRepo.Create(r.Context(), &models.Team{
 		Name:            request.Name,
 		Leader:          userAuth.ID,
 		Repos:           make([]string, 0),
 		PresentationURI: "",
 		Grades:          make(models.Grades),
 	})
-
 	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {
 		return
 	}
+	h.UserRepo.Update(r.Context(), userAuth.ID, bson.M{
+		"team": createdID,
+	})
 
 	// Respond
 	fmt.Fprintf(w, "Successfully created")
@@ -171,7 +174,7 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userAuth := middleware.ExtractUserAuth(r)
 
 	// Check if team exists
-	team, err := h.Repo.GetByID(r.Context(), parsedId)
+	team, err := h.TeamRepo.GetByID(r.Context(), parsedId)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
@@ -200,7 +203,7 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	err = h.Repo.Update(r.Context(), parsedId, request)
+	err = h.TeamRepo.Update(r.Context(), parsedId, request)
 	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
 		return
 	}
@@ -228,7 +231,7 @@ func (h *TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Do work
-	err := h.Repo.Delete(r.Context(), parsedId)
+	err := h.TeamRepo.Delete(r.Context(), parsedId)
 	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
 		return
 	}

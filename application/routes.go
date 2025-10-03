@@ -74,7 +74,8 @@ func loadCriterionRoutes(db *mongo.Database) http.Handler {
 func loadTeamRoutes(db *mongo.Database) http.Handler {
 	teamMux := http.NewServeMux()
 	teamHandler := &handlers.TeamHandler{
-		Repo: repository.NewTeamRepo(db),
+		TeamRepo: repository.NewTeamRepo(db),
+		UserRepo: repository.NewUserRepo(db),
 	}
 
 	teamMux.HandleFunc("GET /", teamHandler.GetPaged)
