@@ -223,15 +223,21 @@ func (h *TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// Get auth data
 	userAuth := middleware.ExtractUserAuth(r)
 
+	// Get the team
+	team, err := h.TeamRepo.GetByID(r.Context(), parsedId)
+	if utils.CheckGetFromDB(w, err) {
+		return
+	}
+
 	// Check access
-	if userAuth.Role == models.Admin || parsedId == userAuth.Team {
+	if userAuth.Role == models.Admin || team.Leader == userAuth.ID {
 	} else {
 		http.Error(w, "Access denied", http.StatusForbidden)
 		return
 	}
 
 	// Do work
-	err := h.TeamRepo.Delete(r.Context(), parsedId)
+	err = h.TeamRepo.Delete(r.Context(), parsedId)
 	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
 		return
 	}
