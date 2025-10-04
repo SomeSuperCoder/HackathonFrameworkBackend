@@ -11,6 +11,6 @@ type Team struct {
 	Name            string        `bson:"name" json:"name"`
 	Leader          bson.ObjectID `bson:"leader" json:"leader"`
 	Repos           []string      `bson:"repos" json:"repos"`
-	PresentationURI string        `bson:"presentationURI" json:"presentationURI"`
+	PresentationURI string        `bson:"presentation_uri" json:"presentation_uri"`
 	Grades          Grades        `bson:"grades" json:"grades"`
 }
