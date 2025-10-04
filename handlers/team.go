@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SomeSuperCoder/global-chat/internal"
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
 	"github.com/SomeSuperCoder/global-chat/internal/validators"
 	"github.com/SomeSuperCoder/global-chat/models"
@@ -122,7 +123,7 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userAuth := middleware.ExtractUserAuth(r)
 
 	// Check access
-	if userAuth.Team != bson.NilObjectID {
+	if userAuth.Team != internal.UndefinedObjectID {
 		http.Error(w, "Access denied: you already are part of a team", http.StatusForbidden)
 		return
 	}

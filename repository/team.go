@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/SomeSuperCoder/global-chat/internal"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -111,7 +112,7 @@ func (r *TeamRepo) Delete(ctx context.Context, id bson.ObjectID) error {
 		"team": id,
 	}, bson.M{
 		"$set": bson.M{
-			"team": bson.NilObjectID,
+			"team": internal.UndefinedObjectID,
 		},
 	})
 	if err != nil {

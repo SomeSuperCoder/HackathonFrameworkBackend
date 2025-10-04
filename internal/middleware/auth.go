@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/SomeSuperCoder/global-chat/internal"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/utils"
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -37,13 +37,13 @@ func AuthMiddleware(next http.HandlerFunc, db *mongo.Database) http.HandlerFunc 
 			}
 		} else {
 			user = &models.User{
-				ID:        bson.NilObjectID,
+				ID:        internal.UndefinedObjectID,
 				Username:  "test",
 				Name:      "Mr. Test",
 				Birthdate: time.Now(),
 				Role:      models.Admin,
 				ChatID:    0,
-				Team:      bson.NilObjectID,
+				Team:      internal.UndefinedObjectID,
 			}
 		}
 
