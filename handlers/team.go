@@ -130,7 +130,7 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Parse
 	var request struct {
-		Name string `json:"name" bson:"name,omitempty" validate:"omitempty,min=1,max=40"`
+		Name string `json:"name" bson:"name" validate:"required,min=1,max=40"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if utils.CheckJSONError(w, err) {

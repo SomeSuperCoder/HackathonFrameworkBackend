@@ -19,16 +19,8 @@ export const options = {
   },
 };
 
-const sessionToken = "jF1r5OhhNVia9ztFQtgnefak6rES1K_xor_gnFEd7no=";
-const csrfToken = "BRP803aW1mY2xwyGOe3nO1-CAH0OryW77Xjz-t_VAGY=";
-
 export default function () {
-  let res = http.get("http://localhost:8090/messages/?page=1&limit=50", {
-    headers: { "X-CSRF-Token": csrfToken },
-    cookies: {
-      session_token: sessionToken,
-    },
-  });
+  let res = http.get("http://localhost:8090/teams/?page=1&limit=50");
   let checkResult = check(res, {
     "status is 200": (res) => res.status === 200,
   });
