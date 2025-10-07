@@ -26,12 +26,8 @@ func (h *EventHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond
-	resultString, err := json.Marshal(&events)
-	if utils.CheckError(w, err, "Failed to serialize JSON", http.StatusInternalServerError) {
-		return
-	}
+	utils.RespondWithJSON(w, events)
 
-	fmt.Fprintln(w, string(resultString))
 }
 
 func (h *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -47,13 +43,8 @@ func (h *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serialized, err := json.Marshal(&event)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to marshal JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintln(w, string(serialized))
+	// Respond
+	utils.RespondWithJSON(w, event)
 }
 
 func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {

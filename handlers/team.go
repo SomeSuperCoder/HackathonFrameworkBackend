@@ -60,16 +60,10 @@ func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond
-	result := &TeamsResponse{
+	utils.RespondWithJSON(w, TeamsResponse{
 		Teams:      teams,
 		TotalCount: totalCount,
-	}
-	resultString, err := json.Marshal(result)
-	if utils.CheckError(w, err, "Failed to serialize JSON", http.StatusInternalServerError) {
-		return
-	}
-
-	fmt.Fprintln(w, string(resultString))
+	})
 }
 
 func (h *TeamHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -87,12 +81,7 @@ func (h *TeamHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond
-	serialized, err := json.Marshal(&team)
-	if utils.CheckJSONError(w, err) {
-		return
-	}
-
-	fmt.Fprintln(w, string(serialized))
+	utils.RespondWithJSON(w, team)
 }
 
 func (h *TeamHandler) GetMembers(w http.ResponseWriter, r *http.Request) {
@@ -110,12 +99,7 @@ func (h *TeamHandler) GetMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond
-	serialized, err := json.Marshal(&members)
-	if utils.CheckJSONError(w, err) {
-		return
-	}
-
-	fmt.Fprintln(w, string(serialized))
+	utils.RespondWithJSON(w, members)
 }
 
 func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {

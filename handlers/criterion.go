@@ -25,12 +25,7 @@ func (h *CriterionHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond
-	resultString, err := json.Marshal(&criteria)
-	if utils.CheckError(w, err, "Failed to serialize JSON", http.StatusInternalServerError) {
-		return
-	}
-
-	fmt.Fprintln(w, string(resultString))
+	utils.RespondWithJSON(w, criteria)
 }
 
 func (h *CriterionHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -46,13 +41,8 @@ func (h *CriterionHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serialized, err := json.Marshal(&criterion)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to marshal JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintln(w, string(serialized))
+	// Respond
+	utils.RespondWithJSON(w, criterion)
 }
 
 func (h *CriterionHandler) Create(w http.ResponseWriter, r *http.Request) {

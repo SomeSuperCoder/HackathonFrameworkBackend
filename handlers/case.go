@@ -25,12 +25,7 @@ func (h *CaseHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond
-	resultString, err := json.Marshal(&cases)
-	if utils.CheckError(w, err, "Failed to serialize JSON", http.StatusInternalServerError) {
-		return
-	}
-
-	fmt.Fprintln(w, string(resultString))
+	utils.RespondWithJSON(w, cases)
 }
 
 func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -46,13 +41,8 @@ func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serialized, err := json.Marshal(&case_)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to marshal JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintln(w, string(serialized))
+	// Respond
+	utils.RespondWithJSON(w, case_)
 }
 
 func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {

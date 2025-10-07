@@ -57,16 +57,10 @@ func (h *UserHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond
-	result := &UsersResponse{
+	utils.RespondWithJSON(w, &UsersResponse{
 		Users:      users,
 		TotalCount: totalCount,
-	}
-	resultString, err := json.Marshal(result)
-	if utils.CheckError(w, err, "Failed to serialize JSON", http.StatusInternalServerError) {
-		return
-	}
-
-	fmt.Fprintln(w, string(resultString))
+	})
 }
 
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -93,13 +87,7 @@ func getCommon(user *models.User, err error, w http.ResponseWriter) {
 		return
 	}
 
-	serializedUser, err := json.Marshal(&user)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to marshal JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintln(w, string(serializedUser))
+	utils.RespondWithJSON(w, user)
 }
 
 func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
