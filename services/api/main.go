@@ -2,8 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/SomeSuperCoder/global-chat/application"
 )
@@ -13,7 +12,6 @@ func main() {
 
 	err := app.Start(context.Background())
 	if err != nil {
-		fmt.Println("failed to start app:", err)
-		os.Exit(1)
+		log.Fatalf("failed to start app: %v", err.Error())
 	}
 }
