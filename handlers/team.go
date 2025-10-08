@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -102,15 +101,7 @@ func (h *TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		Name string `json:"name" bson:"name" validate:"required,min=1,max=40"`
 	}
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if utils.CheckJSONError(w, err) {
-		return
-	}
-
-	// Validate
-	tv := validators.NewTeamValidator(userAuth, nil)
-	err = tv.ValidateRequest(&request)
-	if utils.CheckJSONValidError(w, err) {
+	if DefaultParseAndValidate(w, r, &request) {
 		return
 	}
 
@@ -161,15 +152,7 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 		PresentationURI string        `json:"presentation_uri" bson:"presentation_uri,omitempty" validate:"omitempty,owner,url"`
 		Grades          models.Grades `json:"grades" bson:"grades,omitempty" validate:"omitempty,judge,grades"`
 	}
-	err = json.NewDecoder(r.Body).Decode(&request)
-	if utils.CheckJSONError(w, err) {
-		return
-	}
-
-	tv := validators.NewTeamValidator(userAuth, team)
-	// Validate
-	err = tv.ValidateRequest(&request)
-	if utils.CheckJSONValidError(w, err) {
+	if ParseAndValidate(w, r, validators.NewTeamValidator(userAuth, team), &request) {
 		return
 	}
 

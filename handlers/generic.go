@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
+	"github.com/SomeSuperCoder/global-chat/internal/middleware"
+	"github.com/SomeSuperCoder/global-chat/internal/validators"
 	"github.com/SomeSuperCoder/global-chat/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -45,4 +48,26 @@ func Get[T any](w http.ResponseWriter, r *http.Request, repo Findable[T]) {
 
 	// Respond
 	utils.RespondWithJSON(w, cases)
+}
+
+// ===================================================
+// Helpers
+// ===================================================
+func ParseAndValidate(w http.ResponseWriter, r *http.Request, validator validators.Validator, request any) bool {
+	err := json.NewDecoder(r.Body).Decode(request)
+	if utils.CheckJSONError(w, err) {
+		return true
+	}
+
+	// Validate
+	err = validator.ValidateRequest(request)
+	if utils.CheckJSONValidError(w, err) {
+		return true
+	}
+
+	return false
+}
+
+func DefaultParseAndValidate(w http.ResponseWriter, r *http.Request, request any) bool {
+	return ParseAndValidate(w, r, validators.NewAccessValidator(middleware.ExtractUserAuth(r)), request)
 }

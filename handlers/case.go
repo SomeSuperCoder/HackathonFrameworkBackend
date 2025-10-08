@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
-	"github.com/SomeSuperCoder/global-chat/internal/validators"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
 	"github.com/SomeSuperCoder/global-chat/utils"
@@ -41,20 +39,12 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Description string `json:"description" bson:"description" validate:"required"`
 		ImageURI    string `json:"image_uri" bson:"image_uri" validate:"omitempty,url"`
 	}
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if utils.CheckJSONError(w, err) {
-		return
-	}
-
-	// Validate
-	tv := validators.NewAccessValidator(userAuth)
-	err = tv.ValidateRequest(&request)
-	if utils.CheckJSONValidError(w, err) {
+	if DefaultParseAndValidate(w, r, &request) {
 		return
 	}
 
 	// Do work
-	err = h.Repo.Create(r.Context(), &models.Case{
+	err := h.Repo.Create(r.Context(), &models.Case{
 		Name:        request.Name,
 		Description: request.Description,
 		ImageURI:    request.ImageURI,
@@ -76,29 +66,18 @@ func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get auth data
-	userAuth := middleware.ExtractUserAuth(r)
-
 	// Parse
 	var request struct {
 		Name        string `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,admin,min=1,max=40"`
 		Description string `json:"description" bson:"description,omitempty" validate:"omitempty,admin,omitempty,admin"`
 		ImageURI    string `json:"image_uri" bson:"image_uri,omitempty" validate:"omitempty,admin,omitempty,admin,url"`
 	}
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if utils.CheckJSONError(w, err) {
-		return
-	}
-
-	tv := validators.NewAccessValidator(userAuth)
-	// Validate
-	err = tv.ValidateRequest(&request)
-	if utils.CheckJSONValidError(w, err) {
+	if DefaultParseAndValidate(w, r, &request) {
 		return
 	}
 
 	// Do work
-	err = h.Repo.Update(r.Context(), parsedId, request)
+	err := h.Repo.Update(r.Context(), parsedId, request)
 	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
 		return
 	}

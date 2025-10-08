@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -96,20 +95,13 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Role      models.UserRole `json:"role" bson:"role,omitempty" validate:"omitempty,admin,oneof=0 1 2"`
 		Team      bson.ObjectID   `json:"team" bson:"team,omitempty" validate:"omitempty,self"`
 	}
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if utils.CheckJSONError(w, err) {
-		return
-	}
 
-	tv := validators.NewUserValidator(userAuth, parsedId)
-	// Validate
-	err = tv.ValidateRequest(&request)
-	if utils.CheckJSONValidError(w, err) {
+	if ParseAndValidate(w, r, validators.NewUserValidator(userAuth, parsedId), &request) {
 		return
 	}
 
 	// Do work
-	err = h.Repo.Update(r.Context(), parsedId, request)
+	err := h.Repo.Update(r.Context(), parsedId, request)
 	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
 		return
 	}
