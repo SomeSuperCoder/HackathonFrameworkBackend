@@ -67,21 +67,7 @@ func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TeamHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
-	// Do work
-	team, err := h.TeamRepo.GetByID(r.Context(), parsedId)
-	if utils.CheckGetFromDB(w, err) {
-		return
-	}
-
-	// Respond
-	utils.RespondWithJSON(w, team)
+	GetByID(w, r, h.TeamRepo)
 }
 
 func (h *TeamHandler) GetMembers(w http.ResponseWriter, r *http.Request) {

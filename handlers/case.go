@@ -29,20 +29,7 @@ func (h *CaseHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
-	case_, err := h.Repo.GetByID(r.Context(), parsedId)
-	if utils.CheckGetFromDB(w, err) {
-		return
-	}
-
-	// Respond
-	utils.RespondWithJSON(w, case_)
+	GetByID(w, r, h.Repo)
 }
 
 func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {

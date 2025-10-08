@@ -64,25 +64,13 @@ func (h *UserHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
-	user, err := h.Repo.GetByID(r.Context(), parsedId)
-	getCommon(user, err, w)
+	GetByID(w, r, h.Repo)
 }
 
 func (h *UserHandler) GetByUsername(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
 
 	user, err := h.Repo.GetByUsername(r.Context(), username)
-	getCommon(user, err, w)
-}
-
-func getCommon(user *models.User, err error, w http.ResponseWriter) {
 	if utils.CheckGetFromDB(w, err) {
 		return
 	}

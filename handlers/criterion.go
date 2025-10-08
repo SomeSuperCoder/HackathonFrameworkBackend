@@ -29,20 +29,7 @@ func (h *CriterionHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CriterionHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
-	criterion, err := h.Repo.GetByID(r.Context(), parsedId)
-	if utils.CheckGetFromDB(w, err) {
-		return
-	}
-
-	// Respond
-	utils.RespondWithJSON(w, criterion)
+	GetByID(w, r, h.Repo)
 }
 
 func (h *CriterionHandler) Create(w http.ResponseWriter, r *http.Request) {
