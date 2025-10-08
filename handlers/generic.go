@@ -29,3 +29,20 @@ func GetByID[T any](w http.ResponseWriter, r *http.Request, repo GettableByID[T]
 	// Respond
 	utils.RespondWithJSON(w, value)
 }
+
+// ====================
+
+type Findable[T any] interface {
+	Find(ctx context.Context) ([]T, error)
+}
+
+func Get[T any](w http.ResponseWriter, r *http.Request, repo Findable[T]) {
+	//Do work
+	cases, err := repo.Find(r.Context())
+	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
+		return
+	}
+
+	// Respond
+	utils.RespondWithJSON(w, cases)
+}

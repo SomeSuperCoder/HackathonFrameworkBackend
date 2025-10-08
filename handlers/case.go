@@ -18,14 +18,7 @@ type CaseHandler struct {
 }
 
 func (h *CaseHandler) Get(w http.ResponseWriter, r *http.Request) {
-	// Do work
-	cases, err := h.Repo.Find(r.Context())
-	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	utils.RespondWithJSON(w, cases)
+	Get(w, r, h.Repo)
 }
 
 func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {

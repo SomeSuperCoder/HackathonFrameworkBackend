@@ -18,14 +18,8 @@ type CriterionHandler struct {
 }
 
 func (h *CriterionHandler) Get(w http.ResponseWriter, r *http.Request) {
-	// Do work
-	criteria, err := h.Repo.Find(r.Context())
-	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
-		return
-	}
+	Get(w, r, h.Repo)
 
-	// Respond
-	utils.RespondWithJSON(w, criteria)
 }
 
 func (h *CriterionHandler) GetByID(w http.ResponseWriter, r *http.Request) {

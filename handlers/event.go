@@ -19,15 +19,7 @@ type EventHandler struct {
 }
 
 func (h *EventHandler) Get(w http.ResponseWriter, r *http.Request) {
-	// Do work
-	events, err := h.Repo.Find(r.Context())
-	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	utils.RespondWithJSON(w, events)
-
+	Get(w, r, h.Repo)
 }
 
 func (h *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
