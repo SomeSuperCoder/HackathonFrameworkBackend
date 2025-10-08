@@ -7,6 +7,7 @@ import (
 
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
 	"github.com/SomeSuperCoder/global-chat/internal/validators"
+	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -16,20 +17,17 @@ type GettableByID[T any] interface {
 }
 
 func GetByID[T any](w http.ResponseWriter, r *http.Request, repo GettableByID[T]) {
-	// Load data
 	var parsedId bson.ObjectID
 	var exit bool
 	if parsedId, exit = utils.ParseRequestID(w, r); exit {
 		return
 	}
 
-	// Do work
 	value, err := repo.GetByID(r.Context(), parsedId)
 	if utils.CheckGetFromDB(w, err) {
 		return
 	}
 
-	// Respond
 	utils.RespondWithJSON(w, value)
 }
 
@@ -40,13 +38,11 @@ type Findable[T any] interface {
 }
 
 func Get[T any](w http.ResponseWriter, r *http.Request, repo Findable[T]) {
-	//Do work
 	cases, err := repo.Find(r.Context())
 	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
 		return
 	}
 
-	// Respond
 	utils.RespondWithJSON(w, cases)
 }
 
@@ -59,7 +55,6 @@ func ParseAndValidate(w http.ResponseWriter, r *http.Request, validator validato
 		return true
 	}
 
-	// Validate
 	err = validator.ValidateRequest(request)
 	if utils.CheckJSONValidError(w, err) {
 		return true
@@ -70,4 +65,13 @@ func ParseAndValidate(w http.ResponseWriter, r *http.Request, validator validato
 
 func DefaultParseAndValidate(w http.ResponseWriter, r *http.Request, request any) bool {
 	return ParseAndValidate(w, r, validators.NewAccessValidator(middleware.ExtractUserAuth(r)), request)
+}
+
+func AdminCheck(w http.ResponseWriter, r *http.Request) bool {
+	if middleware.ExtractUserAuth(r).Role != models.Admin {
+		http.Error(w, "Access denied: only the admin can perform this operation", http.StatusForbidden)
+		return true
+	}
+
+	return false
 }

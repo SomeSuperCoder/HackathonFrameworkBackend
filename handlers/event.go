@@ -25,12 +25,7 @@ func (h *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// Get auth data
-	userAuth := middleware.ExtractUserAuth(r)
-
-	// Check access
-	if userAuth.Role != models.Admin {
-		http.Error(w, "Access denied: only the admin can perform this operation", http.StatusForbidden)
+	if AdminCheck(w, r) {
 		return
 	}
 
