@@ -29,7 +29,6 @@ func (h *CriterionHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse
 	var request struct {
 		Text string `json:"text" bson:"text" validate:"required,min=1,max=40"`
 	}
@@ -37,17 +36,9 @@ func (h *CriterionHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Do work
-	err := h.Repo.Create(r.Context(), &models.Criterion{
+	Create(w, r, h.Repo, &models.Criterion{
 		Text: request.Text,
 	})
-
-	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully created")
 }
 
 func (h *CriterionHandler) Update(w http.ResponseWriter, r *http.Request) {

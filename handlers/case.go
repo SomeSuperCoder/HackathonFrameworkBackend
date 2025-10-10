@@ -28,7 +28,6 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse
 	var request struct {
 		Name        string `json:"name" bson:"name" validate:"required,min=1,max=40"`
 		Description string `json:"description" bson:"description" validate:"required"`
@@ -38,19 +37,11 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Do work
-	err := h.Repo.Create(r.Context(), &models.Case{
+	Create(w, r, h.Repo, &models.Case{
 		Name:        request.Name,
 		Description: request.Description,
 		ImageURI:    request.ImageURI,
 	})
-
-	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully created")
 }
 
 func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {

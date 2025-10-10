@@ -39,19 +39,11 @@ func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Do work
-	err := h.Repo.Create(r.Context(), &models.Event{
+	Create(w, r, h.Repo, &models.Event{
 		Name:        request.Name,
 		Description: request.Description,
 		Time:        request.Time,
 	})
-
-	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully created")
 }
 
 func (h *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
