@@ -28,7 +28,7 @@ func Find[T any](ctx context.Context, c *mongo.Collection) ([]T, error) {
 }
 
 func FindPaged[T any](ctx context.Context, c *mongo.Collection, page, limit int64) ([]T, int64, error) {
-	var teams = []T{}
+	var values = []T{}
 
 	// Set pagination options
 	skip := (page - 1) * limit
@@ -45,7 +45,7 @@ func FindPaged[T any](ctx context.Context, c *mongo.Collection, page, limit int6
 	defer cursor.Close(ctx)
 
 	// Extract records
-	err = cursor.All(ctx, &teams)
+	err = cursor.All(ctx, &values)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -53,11 +53,28 @@ func FindPaged[T any](ctx context.Context, c *mongo.Collection, page, limit int6
 	// Get total count
 	count, err := c.CountDocuments(ctx, bson.M{})
 
-	return teams, count, err
+	return values, count, err
 }
 
-func Create(ctx context.Context, c *mongo.Collection, team any) (bson.ObjectID, error) {
-	res, err := c.InsertOne(ctx, team)
+func Create(ctx context.Context, c *mongo.Collection, value any) (bson.ObjectID, error) {
+	res, err := c.InsertOne(ctx, value)
 	objID, _ := res.InsertedID.(bson.ObjectID)
 	return objID, err
+}
+
+func GetBy[T any](ctx context.Context, c *mongo.Collection, key string, value any) (*T, error) {
+	var got T
+
+	err := c.FindOne(ctx, bson.M{
+		key: value,
+	}, nil).Decode(&got)
+	if err != nil {
+		return nil, err
+	}
+
+	return &got, err
+}
+
+func GetByID[T any](ctx context.Context, c *mongo.Collection, id bson.ObjectID) (*T, error) {
+	return GetBy[T](ctx, c, "_id", id)
 }

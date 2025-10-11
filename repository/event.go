@@ -29,16 +29,7 @@ func (r *EventRepo) Create(ctx context.Context, event *models.Event) (bson.Objec
 }
 
 func (r *EventRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Event, error) {
-	var event models.Event
-
-	err := r.Events.FindOne(ctx, bson.M{
-		"_id": id,
-	}, nil).Decode(&event)
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, err
+	return GetByID[models.Event](ctx, r.Events, id)
 }
 
 func (r *EventRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {

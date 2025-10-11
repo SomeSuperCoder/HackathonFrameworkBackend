@@ -32,15 +32,7 @@ func (r *TeamRepo) Create(ctx context.Context, team *models.Team) (bson.ObjectID
 }
 
 func (r *TeamRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Team, error) {
-	var team models.Team
-	err := r.Teams.FindOne(ctx, bson.M{
-		"_id": id,
-	}, nil).Decode(&team)
-	if err != nil {
-		return nil, err
-	}
-
-	return &team, err
+	return GetByID[models.Team](ctx, r.Teams, id)
 }
 
 func (r *TeamRepo) GetMembers(ctx context.Context, id bson.ObjectID) ([]models.User, error) {

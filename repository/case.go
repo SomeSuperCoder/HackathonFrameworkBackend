@@ -29,16 +29,7 @@ func (r *CaseRepo) Create(ctx context.Context, case_ *models.Case) (bson.ObjectI
 }
 
 func (r *CaseRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Case, error) {
-	var case_ models.Case
-
-	err := r.Cases.FindOne(ctx, bson.M{
-		"_id": id,
-	}, nil).Decode(&case_)
-	if err != nil {
-		return nil, err
-	}
-
-	return &case_, err
+	return GetByID[models.Case](ctx, r.Cases, id)
 }
 
 func (r *CaseRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {

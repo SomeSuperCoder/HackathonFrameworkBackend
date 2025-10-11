@@ -29,16 +29,7 @@ func (r *CriterionRepo) Create(ctx context.Context, criterion *models.Criterion)
 }
 
 func (r *CriterionRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Criterion, error) {
-	var criterion models.Criterion
-
-	err := r.Criteria.FindOne(ctx, bson.M{
-		"_id": id,
-	}, nil).Decode(&criterion)
-	if err != nil {
-		return nil, err
-	}
-
-	return &criterion, err
+	return GetByID[models.Criterion](ctx, r.Criteria, id)
 }
 
 func (r *CriterionRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
