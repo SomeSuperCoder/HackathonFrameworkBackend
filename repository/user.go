@@ -25,9 +25,8 @@ func (r *UserRepo) FindPaged(ctx context.Context, page, limit int64) ([]models.U
 	return FindPaged[models.User](ctx, r.Users, page, limit)
 }
 
-func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
-	_, err := r.Users.InsertOne(ctx, user)
-	return err
+func (r *UserRepo) Create(ctx context.Context, user *models.User) (bson.ObjectID, error) {
+	return Create(ctx, r.Users, user)
 }
 
 func (r *UserRepo) GetByID(ctx context.Context, userID bson.ObjectID) (*models.User, error) {

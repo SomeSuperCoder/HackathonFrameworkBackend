@@ -55,3 +55,9 @@ func FindPaged[T any](ctx context.Context, c *mongo.Collection, page, limit int6
 
 	return teams, count, err
 }
+
+func Create(ctx context.Context, c *mongo.Collection, team any) (bson.ObjectID, error) {
+	res, err := c.InsertOne(ctx, team)
+	objID, _ := res.InsertedID.(bson.ObjectID)
+	return objID, err
+}

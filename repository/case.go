@@ -24,9 +24,8 @@ func (r *CaseRepo) Find(ctx context.Context) ([]models.Case, error) {
 	return Find[models.Case](ctx, r.Cases)
 }
 
-func (r *CaseRepo) Create(ctx context.Context, case_ *models.Case) error {
-	_, err := r.Cases.InsertOne(ctx, case_)
-	return err
+func (r *CaseRepo) Create(ctx context.Context, case_ *models.Case) (bson.ObjectID, error) {
+	return Create(ctx, r.Cases, case_)
 }
 
 func (r *CaseRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Case, error) {

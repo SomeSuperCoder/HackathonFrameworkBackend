@@ -24,9 +24,8 @@ func (r *EventRepo) Find(ctx context.Context) ([]models.Event, error) {
 	return Find[models.Event](ctx, r.Events)
 }
 
-func (r *EventRepo) Create(ctx context.Context, event *models.Event) error {
-	_, err := r.Events.InsertOne(ctx, event)
-	return err
+func (r *EventRepo) Create(ctx context.Context, event *models.Event) (bson.ObjectID, error) {
+	return Create(ctx, r.Events, event)
 }
 
 func (r *EventRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Event, error) {

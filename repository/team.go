@@ -28,9 +28,7 @@ func (r *TeamRepo) FindPaged(ctx context.Context, page, limit int64) ([]models.T
 }
 
 func (r *TeamRepo) Create(ctx context.Context, team *models.Team) (bson.ObjectID, error) {
-	res, err := r.Teams.InsertOne(ctx, team)
-	objID, _ := res.InsertedID.(bson.ObjectID)
-	return objID, err
+	return Create(ctx, r.Teams, team)
 }
 
 func (r *TeamRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Team, error) {

@@ -94,7 +94,7 @@ func FindPaged[T any](w http.ResponseWriter, r *http.Request, repo PagedFinder[T
 type ValueGenerator[T any] = func() T
 
 type Creatator[T any] interface {
-	Create(ctx context.Context, value T) error
+	Create(ctx context.Context, value T) (bson.ObjectID, error)
 }
 
 func AdminOnlyCreate[T any, R any](w http.ResponseWriter, r *http.Request, repo Creatator[T], request R, valueGenerator ValueGenerator[T]) {
@@ -116,13 +116,13 @@ func Create[T any, R any](w http.ResponseWriter, r *http.Request, repo Creatator
 }
 
 func CreateInner[T any](w http.ResponseWriter, r *http.Request, repo Creatator[T], newValue T) {
-	err := repo.Create(r.Context(), newValue)
+	createdID, err := repo.Create(r.Context(), newValue)
 
 	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {
 		return
 	}
 
-	fmt.Fprintf(w, "Successfully created")
+	fmt.Fprintln(w, createdID.Hex())
 }
 
 // ====================

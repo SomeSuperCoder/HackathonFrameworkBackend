@@ -38,7 +38,7 @@ func (b *Bot) EnterBirthdate(ctx *th.Context, update telego.Update) error {
 		Role:      models.Participant,
 		Team:      internal.UndefinedObjectID,
 	}
-	err := b.UserRepo.Create(ctx, newUser)
+	_, err := b.UserRepo.Create(ctx, newUser)
 
 	if err != nil {
 

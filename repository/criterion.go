@@ -24,9 +24,8 @@ func (r *CriterionRepo) Find(ctx context.Context) ([]models.Criterion, error) {
 	return Find[models.Criterion](ctx, r.Criteria)
 }
 
-func (r *CriterionRepo) Create(ctx context.Context, criterion *models.Criterion) error {
-	_, err := r.Criteria.InsertOne(ctx, criterion)
-	return err
+func (r *CriterionRepo) Create(ctx context.Context, criterion *models.Criterion) (bson.ObjectID, error) {
+	return Create(ctx, r.Criteria, criterion)
 }
 
 func (r *CriterionRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Criterion, error) {
