@@ -55,13 +55,7 @@ func (r *TeamRepo) GetMembers(ctx context.Context, id bson.ObjectID) ([]models.U
 }
 
 func (r *TeamRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
-	res := r.Teams.FindOneAndUpdate(ctx, bson.M{
-		"_id": id,
-	}, bson.M{
-		"$set": update,
-	})
-
-	return res.Err()
+	return Update(ctx, r.Teams, id, update)
 }
 
 func (r *TeamRepo) Delete(ctx context.Context, id bson.ObjectID) error {

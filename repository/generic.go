@@ -78,3 +78,13 @@ func GetBy[T any](ctx context.Context, c *mongo.Collection, key string, value an
 func GetByID[T any](ctx context.Context, c *mongo.Collection, id bson.ObjectID) (*T, error) {
 	return GetBy[T](ctx, c, "_id", id)
 }
+
+func Update(ctx context.Context, c *mongo.Collection, id bson.ObjectID, update any) error {
+	res := c.FindOneAndUpdate(ctx, bson.M{
+		"_id": id,
+	}, bson.M{
+		"$set": update,
+	})
+
+	return res.Err()
+}

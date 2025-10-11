@@ -33,13 +33,7 @@ func (r *EventRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Even
 }
 
 func (r *EventRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
-	res := r.Events.FindOneAndUpdate(ctx, bson.M{
-		"_id": id,
-	}, bson.M{
-		"$set": update,
-	})
-
-	return res.Err()
+	return Update(ctx, r.Events, id, update)
 }
 
 func (r *EventRepo) Delete(ctx context.Context, id bson.ObjectID) error {

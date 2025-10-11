@@ -33,13 +33,7 @@ func (r *CriterionRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.
 }
 
 func (r *CriterionRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
-	res := r.Criteria.FindOneAndUpdate(ctx, bson.M{
-		"_id": id,
-	}, bson.M{
-		"$set": update,
-	})
-
-	return res.Err()
+	return Update(ctx, r.Criteria, id, update)
 }
 
 func (r *CriterionRepo) Delete(ctx context.Context, id bson.ObjectID) error {

@@ -33,13 +33,7 @@ func (r *CaseRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Case,
 }
 
 func (r *CaseRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
-	res := r.Cases.FindOneAndUpdate(ctx, bson.M{
-		"_id": id,
-	}, bson.M{
-		"$set": update,
-	})
-
-	return res.Err()
+	return Update(ctx, r.Cases, id, update)
 }
 
 func (r *CaseRepo) Delete(ctx context.Context, id bson.ObjectID) error {
