@@ -7,7 +7,6 @@ import (
 	"github.com/SomeSuperCoder/global-chat/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type TeamRepo struct {
@@ -25,32 +24,7 @@ func NewTeamRepo(database *mongo.Database) *TeamRepo {
 }
 
 func (r *TeamRepo) FindPaged(ctx context.Context, page, limit int64) ([]models.Team, int64, error) {
-	var teams = []models.Team{}
-
-	// Set pagination options
-	skip := (page - 1) * limit
-	opts := options.Find()
-	opts.SetLimit(limit)
-	opts.SetSkip(skip)
-	opts.SetSort(bson.M{"created_at": -1})
-
-	// Init a cursor
-	cursor, err := r.Teams.Find(ctx, bson.M{}, opts)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer cursor.Close(ctx)
-
-	// Extract records
-	err = cursor.All(ctx, &teams)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	// Get total count
-	count, err := r.Teams.CountDocuments(ctx, bson.M{})
-
-	return teams, count, err
+	return FindPaged[models.Team](ctx, r.Teams, page, limit)
 }
 
 func (r *TeamRepo) Create(ctx context.Context, team *models.Team) (bson.ObjectID, error) {
