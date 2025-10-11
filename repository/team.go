@@ -10,29 +10,17 @@ import (
 )
 
 type TeamRepo struct {
+	*GenericRepo[models.Team]
 	database *mongo.Database
-	Teams    *mongo.Collection
 	Users    *mongo.Collection
 }
 
 func NewTeamRepo(database *mongo.Database) *TeamRepo {
 	return &TeamRepo{
-		database: database,
-		Teams:    database.Collection("teams"),
-		Users:    database.Collection("users"),
+		database:    database,
+		Users:       database.Collection("users"),
+		GenericRepo: NewGenericRepo[models.Team](database, "teams"),
 	}
-}
-
-func (r *TeamRepo) FindPaged(ctx context.Context, page, limit int64) ([]models.Team, int64, error) {
-	return FindPaged[models.Team](ctx, r.Teams, page, limit)
-}
-
-func (r *TeamRepo) Create(ctx context.Context, team *models.Team) (bson.ObjectID, error) {
-	return Create(ctx, r.Teams, team)
-}
-
-func (r *TeamRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Team, error) {
-	return GetByID[models.Team](ctx, r.Teams, id)
 }
 
 func (r *TeamRepo) GetMembers(ctx context.Context, id bson.ObjectID) ([]models.User, error) {
@@ -41,12 +29,8 @@ func (r *TeamRepo) GetMembers(ctx context.Context, id bson.ObjectID) ([]models.U
 	})
 }
 
-func (r *TeamRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
-	return Update(ctx, r.Teams, id, update)
-}
-
 func (r *TeamRepo) Delete(ctx context.Context, id bson.ObjectID) error {
-	if err := Delete(ctx, r.Teams, id); err != nil {
+	if err := Delete(ctx, r.Collection, id); err != nil {
 		return err
 	}
 

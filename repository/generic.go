@@ -20,6 +20,10 @@ func NewGenericRepo[T any](database *mongo.Database, collectionName string) *Gen
 	}
 }
 
+func (r *GenericRepo[T]) FindPaged(ctx context.Context, page, limit int64) ([]T, int64, error) {
+	return FindPaged[T](ctx, r.Collection, page, limit)
+}
+
 func (r *GenericRepo[T]) Find(ctx context.Context) ([]T, error) {
 	return Find[T](ctx, r.Collection)
 }
