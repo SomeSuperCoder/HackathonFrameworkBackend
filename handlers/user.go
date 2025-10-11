@@ -103,7 +103,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	Delete(w, r, h.Repo, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User, repo any) bool {
+	Delete(w, r, h.Repo, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User) bool {
 		if userAuth.Role == models.Admin || id == userAuth.ID {
 			return false
 		} else {

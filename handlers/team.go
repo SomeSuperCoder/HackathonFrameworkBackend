@@ -160,35 +160,17 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
+	Delete(w, r, h.TeamRepo, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User) bool {
+		team, err := h.TeamRepo.GetByID(r.Context(), id)
+		if utils.CheckGetFromDB(w, err) {
+			return true
+		}
 
-	// Get auth data
-	userAuth := middleware.ExtractUserAuth(r)
-
-	// Get the team
-	team, err := h.TeamRepo.GetByID(r.Context(), parsedId)
-	if utils.CheckGetFromDB(w, err) {
-		return
-	}
-
-	// Check access
-	if userAuth.Role == models.Admin || team.Leader == userAuth.ID {
-	} else {
-		http.Error(w, "Access denied", http.StatusForbidden)
-		return
-	}
-
-	// Do work
-	err = h.TeamRepo.Delete(r.Context(), parsedId)
-	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully deleted")
+		if userAuth.Role == models.Admin || team.Leader == userAuth.ID {
+			return false
+		} else {
+			http.Error(w, "Access denied", http.StatusForbidden)
+			return true
+		}
+	})
 }

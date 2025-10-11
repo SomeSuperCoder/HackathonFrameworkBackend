@@ -88,7 +88,7 @@ type Deleter interface {
 }
 
 func AdminOnlyDelete(w http.ResponseWriter, r *http.Request, repo Deleter) {
-	Delete(w, r, repo, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User, repo any) bool {
+	Delete(w, r, repo, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User) bool {
 		return AdminCheck(w, r)
 	})
 }
@@ -104,7 +104,7 @@ func Delete(w http.ResponseWriter, r *http.Request, repo Deleter, accessChecker 
 	// Get auth data
 	userAuth := middleware.ExtractUserAuth(r)
 
-	if accessChecker(w, r, parsedId, userAuth, repo) {
+	if accessChecker(w, r, parsedId, userAuth) {
 		return
 	}
 
@@ -121,7 +121,7 @@ func Delete(w http.ResponseWriter, r *http.Request, repo Deleter, accessChecker 
 // ===================================================
 // Helpers
 // ===================================================
-type AccessChecker = func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User, repo any) bool
+type AccessChecker = func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User) bool
 
 func ParseAndValidate(w http.ResponseWriter, r *http.Request, validator validators.Validator, request any) bool {
 	err := json.NewDecoder(r.Body).Decode(request)

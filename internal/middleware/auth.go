@@ -41,7 +41,7 @@ func AuthMiddleware(next http.HandlerFunc, db *mongo.Database) http.HandlerFunc 
 				Username:  "test",
 				Name:      "Mr. Test",
 				Birthdate: time.Now(),
-				Role:      models.Judge,
+				Role:      models.Admin,
 				ChatID:    0,
 				Team:      internal.UndefinedObjectID,
 			}
