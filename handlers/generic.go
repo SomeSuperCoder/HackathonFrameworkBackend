@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
 	"github.com/SomeSuperCoder/global-chat/internal/validators"
@@ -44,6 +45,49 @@ func Get[T any](w http.ResponseWriter, r *http.Request, repo Finder[T]) {
 	}
 
 	utils.RespondWithJSON(w, cases)
+}
+
+// ====================
+type PagedResponseBuilder[T any] = func(values []T, totalCount int64) any
+
+type PagedFinder[T any] interface {
+	FindPaged(ctx context.Context, page, limit int64) ([]T, int64, error)
+}
+
+func FindPaged[T any](w http.ResponseWriter, r *http.Request, repo PagedFinder[T], pagedResponseBuilder PagedResponseBuilder[T]) {
+	// Get data
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
+
+	// Validate
+	if page == "" {
+		http.Error(w, "No page number provided", http.StatusBadRequest)
+		return
+	}
+	if limit == "" {
+		http.Error(w, "No limit number provided", http.StatusBadRequest)
+		return
+	}
+
+	// Parse
+	pageNumber, err := strconv.Atoi(page)
+	if utils.CheckError(w, err, "Invalid page number", http.StatusBadRequest) {
+		return
+	}
+
+	limitNumber, err := strconv.Atoi(limit)
+	if utils.CheckError(w, err, "Invalid limit number", http.StatusBadRequest) {
+		return
+	}
+
+	// Do work
+	teams, totalCount, err := repo.FindPaged(r.Context(), int64(pageNumber), int64(limitNumber))
+	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
+		return
+	}
+
+	// Respond
+	utils.RespondWithJSON(w, pagedResponseBuilder(teams, totalCount))
 }
 
 // ====================

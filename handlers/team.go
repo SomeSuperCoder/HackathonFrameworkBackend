@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/SomeSuperCoder/global-chat/internal"
 	"github.com/SomeSuperCoder/global-chat/internal/middleware"
@@ -27,41 +26,11 @@ type TeamsResponse struct {
 }
 
 func (h *TeamHandler) GetPaged(w http.ResponseWriter, r *http.Request) {
-	// Get data
-	page := r.URL.Query().Get("page")
-	limit := r.URL.Query().Get("limit")
-
-	// Validate
-	if page == "" {
-		http.Error(w, "No page number provided", http.StatusBadRequest)
-		return
-	}
-	if limit == "" {
-		http.Error(w, "No limit number provided", http.StatusBadRequest)
-		return
-	}
-
-	// Parse
-	pageNumber, err := strconv.Atoi(page)
-	if utils.CheckError(w, err, "Invalid page number", http.StatusBadRequest) {
-		return
-	}
-
-	limitNumber, err := strconv.Atoi(limit)
-	if utils.CheckError(w, err, "Invalid limit number", http.StatusBadRequest) {
-		return
-	}
-
-	// Do work
-	teams, totalCount, err := h.TeamRepo.FindPaged(r.Context(), int64(pageNumber), int64(limitNumber))
-	if utils.CheckError(w, err, "Failed to get from DB", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	utils.RespondWithJSON(w, TeamsResponse{
-		Teams:      teams,
-		TotalCount: totalCount,
+	FindPaged(w, r, h.TeamRepo, func(values []models.Team, totalCount int64) any {
+		return TeamsResponse{
+			Teams:      values,
+			TotalCount: totalCount,
+		}
 	})
 }
 
