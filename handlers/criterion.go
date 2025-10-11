@@ -45,5 +45,5 @@ func (h *CriterionHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CriterionHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	Delete(w, r, h.Repo)
+	AdminOnlyDelete(w, r, h.Repo)
 }

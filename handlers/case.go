@@ -50,5 +50,5 @@ func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CaseHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	Delete(w, r, h.Repo)
+	AdminOnlyDelete(w, r, h.Repo)
 }

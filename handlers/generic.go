@@ -33,7 +33,6 @@ func GetByID[T any](w http.ResponseWriter, r *http.Request, repo GetteryID[T]) {
 }
 
 // ====================
-
 type Finder[T any] interface {
 	Find(ctx context.Context) ([]T, error)
 }
@@ -83,11 +82,18 @@ func Update[T any](w http.ResponseWriter, r *http.Request, repo Updater, request
 	UpdateInner(w, r, repo, id, request)
 }
 
+// ====================
 type Deleter interface {
 	Delete(ctx context.Context, id bson.ObjectID) error
 }
 
-func Delete(w http.ResponseWriter, r *http.Request, repo Deleter) {
+func AdminOnlyDelete(w http.ResponseWriter, r *http.Request, repo Deleter) {
+	Delete(w, r, repo, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User, repo any) bool {
+		return AdminCheck(w, r)
+	})
+}
+
+func Delete(w http.ResponseWriter, r *http.Request, repo Deleter, accessChecker AccessChecker) {
 	// Load data
 	var parsedId bson.ObjectID
 	var exit bool
@@ -98,10 +104,7 @@ func Delete(w http.ResponseWriter, r *http.Request, repo Deleter) {
 	// Get auth data
 	userAuth := middleware.ExtractUserAuth(r)
 
-	// Check access
-	if userAuth.Role == models.Admin {
-	} else {
-		http.Error(w, "Access denied", http.StatusForbidden)
+	if accessChecker(w, r, parsedId, userAuth, repo) {
 		return
 	}
 
@@ -118,6 +121,8 @@ func Delete(w http.ResponseWriter, r *http.Request, repo Deleter) {
 // ===================================================
 // Helpers
 // ===================================================
+type AccessChecker = func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User, repo any) bool
+
 func ParseAndValidate(w http.ResponseWriter, r *http.Request, validator validators.Validator, request any) bool {
 	err := json.NewDecoder(r.Body).Decode(request)
 	if utils.CheckJSONError(w, err) {

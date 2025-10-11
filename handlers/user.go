@@ -101,7 +101,6 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	UpdateInner(w, r, h.Repo, parsedId, request)
-
 }
 
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
