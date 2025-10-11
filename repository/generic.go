@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/SomeSuperCoder/global-chat/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -25,7 +24,7 @@ func (r *GenericRepo[T]) Find(ctx context.Context) ([]T, error) {
 	return Find[T](ctx, r.Collection)
 }
 
-func (r *GenericRepo[T]) Create(ctx context.Context, value *models.Case) (bson.ObjectID, error) {
+func (r *GenericRepo[T]) Create(ctx context.Context, value *T) (bson.ObjectID, error) {
 	return Create(ctx, r.Collection, value)
 }
 
