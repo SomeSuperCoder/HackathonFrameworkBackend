@@ -83,6 +83,38 @@ func Update[T any](w http.ResponseWriter, r *http.Request, repo Updater, request
 	UpdateInner(w, r, repo, id, request)
 }
 
+type Deleter interface {
+	Delete(ctx context.Context, id bson.ObjectID) error
+}
+
+func Delete(w http.ResponseWriter, r *http.Request, repo Deleter) {
+	// Load data
+	var parsedId bson.ObjectID
+	var exit bool
+	if parsedId, exit = utils.ParseRequestID(w, r); exit {
+		return
+	}
+
+	// Get auth data
+	userAuth := middleware.ExtractUserAuth(r)
+
+	// Check access
+	if userAuth.Role == models.Admin {
+	} else {
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+
+	// Do work
+	err := repo.Delete(r.Context(), parsedId)
+	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
+		return
+	}
+
+	// Respond
+	fmt.Fprintf(w, "Successfully deleted")
+}
+
 // ===================================================
 // Helpers
 // ===================================================

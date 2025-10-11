@@ -1,15 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/SomeSuperCoder/global-chat/internal/middleware"
 	"github.com/SomeSuperCoder/global-chat/models"
 	"github.com/SomeSuperCoder/global-chat/repository"
-	"github.com/SomeSuperCoder/global-chat/utils"
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type EventHandler struct {
@@ -57,29 +53,5 @@ func (h *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EventHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
-	// Get auth data
-	userAuth := middleware.ExtractUserAuth(r)
-
-	// Check access
-	if userAuth.Role == models.Admin {
-	} else {
-		http.Error(w, "Access denied", http.StatusForbidden)
-		return
-	}
-
-	// Do work
-	err := h.Repo.Delete(r.Context(), parsedId)
-	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully deleted")
+	Delete(w, r, h.Repo)
 }
