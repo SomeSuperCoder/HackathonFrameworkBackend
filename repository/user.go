@@ -42,12 +42,5 @@ func (r *UserRepo) Update(ctx context.Context, id bson.ObjectID, update any) err
 }
 
 func (r *UserRepo) Delete(ctx context.Context, id bson.ObjectID) error {
-	_, err := r.Users.DeleteOne(ctx, bson.M{
-		"_id": id,
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return Delete(ctx, r.Users, id)
 }

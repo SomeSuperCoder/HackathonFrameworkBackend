@@ -37,12 +37,5 @@ func (r *CriterionRepo) Update(ctx context.Context, id bson.ObjectID, update any
 }
 
 func (r *CriterionRepo) Delete(ctx context.Context, id bson.ObjectID) error {
-	_, err := r.Criteria.DeleteOne(ctx, bson.M{
-		"_id": id,
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return Delete(ctx, r.Criteria, id)
 }

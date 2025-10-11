@@ -59,23 +59,16 @@ func (r *TeamRepo) Update(ctx context.Context, id bson.ObjectID, update any) err
 }
 
 func (r *TeamRepo) Delete(ctx context.Context, id bson.ObjectID) error {
-	_, err := r.Teams.DeleteOne(ctx, bson.M{
-		"_id": id,
-	})
-	if err != nil {
+	if err := Delete(ctx, r.Teams, id); err != nil {
 		return err
 	}
 
-	_, err = r.Users.UpdateMany(ctx, bson.M{
+	_, err := r.Users.UpdateMany(ctx, bson.M{
 		"team": id,
 	}, bson.M{
 		"$set": bson.M{
 			"team": internal.UndefinedObjectID,
 		},
 	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

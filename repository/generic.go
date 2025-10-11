@@ -88,3 +88,14 @@ func Update(ctx context.Context, c *mongo.Collection, id bson.ObjectID, update a
 
 	return res.Err()
 }
+
+func Delete(ctx context.Context, c *mongo.Collection, id bson.ObjectID) error {
+	_, err := c.DeleteOne(ctx, bson.M{
+		"_id": id,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

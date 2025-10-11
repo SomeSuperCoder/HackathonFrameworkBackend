@@ -37,12 +37,5 @@ func (r *EventRepo) Update(ctx context.Context, id bson.ObjectID, update any) er
 }
 
 func (r *EventRepo) Delete(ctx context.Context, id bson.ObjectID) error {
-	_, err := r.Events.DeleteOne(ctx, bson.M{
-		"_id": id,
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return Delete(ctx, r.Events, id)
 }

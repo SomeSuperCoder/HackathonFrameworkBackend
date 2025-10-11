@@ -37,12 +37,5 @@ func (r *CaseRepo) Update(ctx context.Context, id bson.ObjectID, update any) err
 }
 
 func (r *CaseRepo) Delete(ctx context.Context, id bson.ObjectID) error {
-	_, err := r.Cases.DeleteOne(ctx, bson.M{
-		"_id": id,
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return Delete(ctx, r.Cases, id)
 }
