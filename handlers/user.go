@@ -100,14 +100,8 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Do work
-	err := h.Repo.Update(r.Context(), parsedId, request)
-	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
-		return
-	}
+	UpdateInner(w, r, h.Repo, parsedId, request)
 
-	// Respond
-	fmt.Fprintf(w, "Successfully updated")
 }
 
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {

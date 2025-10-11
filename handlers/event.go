@@ -47,31 +47,13 @@ func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
 	// Parse
 	var request struct {
 		Name        string    `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,min=1,max=40"`
 		Description string    `json:"description" bson:"description,omitempty" validate:"omitempty,admin,omitempty"`
 		Time        time.Time `json:"time" bson:"time,omitempty" validate:"omitempty,admin,omitempty"`
 	}
-	if DefaultParseAndValidate(w, r, &request) {
-		return
-	}
-
-	// Do work
-	err := h.Repo.Update(r.Context(), parsedId, request)
-	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully updated")
+	Update(w, r, h.Repo, request)
 }
 
 func (h *EventHandler) Delete(w http.ResponseWriter, r *http.Request) {

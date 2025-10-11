@@ -45,31 +45,12 @@ func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CaseHandler) Update(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
-	// Parse
 	var request struct {
-		Name        string `json:"name" bson:"name,omitempty" validate:"omitempty,admin,omitempty,admin,min=1,max=40"`
-		Description string `json:"description" bson:"description,omitempty" validate:"omitempty,admin,omitempty,admin"`
-		ImageURI    string `json:"image_uri" bson:"image_uri,omitempty" validate:"omitempty,admin,omitempty,admin,url"`
+		Name        string `json:"name" bson:"name,omitempty" validate:"omitempty,admin,min=1,max=40"`
+		Description string `json:"description" bson:"description,omitempty" validate:"omitempty,admin"`
+		ImageURI    string `json:"image_uri" bson:"image_uri,omitempty" validate:"omitempty,admin,url"`
 	}
-	if DefaultParseAndValidate(w, r, &request) {
-		return
-	}
-
-	// Do work
-	err := h.Repo.Update(r.Context(), parsedId, request)
-	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully updated")
+	Update(w, r, h.Repo, request)
 }
 
 func (h *CaseHandler) Delete(w http.ResponseWriter, r *http.Request) {

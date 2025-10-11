@@ -156,14 +156,7 @@ func (h *TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Do work
-	err = h.TeamRepo.Update(r.Context(), parsedId, request)
-	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully updated")
+	UpdateInner(w, r, h.TeamRepo, parsedId, request)
 }
 
 func (h *TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {

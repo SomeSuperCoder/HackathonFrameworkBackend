@@ -62,6 +62,27 @@ func Create[T any](w http.ResponseWriter, r *http.Request, repo Creatator[T], re
 	fmt.Fprintf(w, "Successfully created")
 }
 
+// ====================
+type Updater interface {
+	Update(ctx context.Context, id bson.ObjectID, update any) error
+}
+
+func Update[T any](w http.ResponseWriter, r *http.Request, repo Updater, request T) {
+	// Load data
+	var id bson.ObjectID
+	var exit bool
+	if id, exit = utils.ParseRequestID(w, r); exit {
+		return
+	}
+
+	// Parse
+	if DefaultParseAndValidate(w, r, &request) {
+		return
+	}
+
+	UpdateInner(w, r, repo, id, request)
+}
+
 // ===================================================
 // Helpers
 // ===================================================
@@ -81,6 +102,17 @@ func ParseAndValidate(w http.ResponseWriter, r *http.Request, validator validato
 
 func DefaultParseAndValidate(w http.ResponseWriter, r *http.Request, request any) bool {
 	return ParseAndValidate(w, r, validators.NewAccessValidator(middleware.ExtractUserAuth(r)), request)
+}
+
+func UpdateInner(w http.ResponseWriter, r *http.Request, repo Updater, id bson.ObjectID, request any) {
+	// Do work
+	err := repo.Update(r.Context(), id, request)
+	if utils.CheckError(w, err, "Failed to update", http.StatusInternalServerError) {
+		return
+	}
+
+	// Respond
+	fmt.Fprintf(w, "Successfully updated")
 }
 
 func AdminCheck(w http.ResponseWriter, r *http.Request) bool {
