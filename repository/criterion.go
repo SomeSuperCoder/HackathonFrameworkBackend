@@ -21,22 +21,7 @@ func NewCriterionRepo(database *mongo.Database) *CriterionRepo {
 }
 
 func (r *CriterionRepo) Find(ctx context.Context) ([]models.Criterion, error) {
-	var criteria = []models.Criterion{}
-
-	// Init a cursor
-	cursor, err := r.Criteria.Find(ctx, bson.M{}, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	// Extract records
-	err = cursor.All(ctx, &criteria)
-	if err != nil {
-		return nil, err
-	}
-
-	return criteria, err
+	return Find[models.Criterion](ctx, r.Criteria)
 }
 
 func (r *CriterionRepo) Create(ctx context.Context, criterion *models.Criterion) error {

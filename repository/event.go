@@ -21,22 +21,7 @@ func NewEventRepo(database *mongo.Database) *EventRepo {
 }
 
 func (r *EventRepo) Find(ctx context.Context) ([]models.Event, error) {
-	var events = []models.Event{}
-
-	// Init a cursor
-	cursor, err := r.Events.Find(ctx, bson.M{}, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	// Extract records
-	err = cursor.All(ctx, &events)
-	if err != nil {
-		return nil, err
-	}
-
-	return events, err
+	return Find[models.Event](ctx, r.Events)
 }
 
 func (r *EventRepo) Create(ctx context.Context, event *models.Event) error {

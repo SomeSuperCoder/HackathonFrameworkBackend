@@ -21,22 +21,7 @@ func NewCaseRepo(database *mongo.Database) *CaseRepo {
 }
 
 func (r *CaseRepo) Find(ctx context.Context) ([]models.Case, error) {
-	var cases = []models.Case{}
-
-	// Init a cursor
-	cursor, err := r.Cases.Find(ctx, bson.M{}, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	// Extract records
-	err = cursor.All(ctx, &cases)
-	if err != nil {
-		return nil, err
-	}
-
-	return cases, err
+	return Find[models.Case](ctx, r.Cases)
 }
 
 func (r *CaseRepo) Create(ctx context.Context, case_ *models.Case) error {
