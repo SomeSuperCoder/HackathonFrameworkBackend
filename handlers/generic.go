@@ -47,12 +47,32 @@ func Get[T any](w http.ResponseWriter, r *http.Request, repo Finder[T]) {
 }
 
 // ====================
+type ValueGenerator[T any] = func() T
+
 type Creatator[T any] interface {
 	Create(ctx context.Context, value T) error
 }
 
-func Create[T any](w http.ResponseWriter, r *http.Request, repo Creatator[T], request T) {
-	err := repo.Create(r.Context(), request)
+func AdminOnlyCreate[T any, R any](w http.ResponseWriter, r *http.Request, repo Creatator[T], request R, valueGenerator ValueGenerator[T]) {
+	Create(w, r, repo, request, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User) bool {
+		return AdminCheck(w, r)
+	}, valueGenerator)
+}
+
+func Create[T any, R any](w http.ResponseWriter, r *http.Request, repo Creatator[T], request R, accessChecker AccessChecker, valueGenerator ValueGenerator[T]) {
+	if accessChecker(w, r, bson.NilObjectID, middleware.ExtractUserAuth(r)) {
+		return
+	}
+
+	if DefaultParseAndValidate(w, r, request) {
+		return
+	}
+
+	CreateInner(w, r, repo, valueGenerator())
+}
+
+func CreateInner[T any](w http.ResponseWriter, r *http.Request, repo Creatator[T], newValue T) {
+	err := repo.Create(r.Context(), newValue)
 
 	if utils.CheckError(w, err, "Failed to create", http.StatusInternalServerError) {
 		return
@@ -122,6 +142,7 @@ func Delete(w http.ResponseWriter, r *http.Request, repo Deleter, accessChecker 
 // Helpers
 // ===================================================
 type AccessChecker = func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User) bool
+type Validator = func(w http.ResponseWriter, r *http.Request)
 
 func ParseAndValidate(w http.ResponseWriter, r *http.Request, validator validators.Validator, request any) bool {
 	err := json.NewDecoder(r.Body).Decode(request)

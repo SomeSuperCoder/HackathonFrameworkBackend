@@ -20,23 +20,17 @@ func (h *CaseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CaseHandler) Create(w http.ResponseWriter, r *http.Request) {
-	if AdminCheck(w, r) {
-		return
-	}
-
 	var request struct {
 		Name        string `json:"name" bson:"name" validate:"required,min=1,max=40"`
 		Description string `json:"description" bson:"description" validate:"required"`
 		ImageURI    string `json:"image_uri" bson:"image_uri" validate:"omitempty,url"`
 	}
-	if DefaultParseAndValidate(w, r, &request) {
-		return
-	}
-
-	Create(w, r, h.Repo, &models.Case{
-		Name:        request.Name,
-		Description: request.Description,
-		ImageURI:    request.ImageURI,
+	AdminOnlyCreate(w, r, h.Repo, &request, func() *models.Case {
+		return &models.Case{
+			Name:        request.Name,
+			Description: request.Description,
+			ImageURI:    request.ImageURI,
+		}
 	})
 }
 

@@ -21,19 +21,13 @@ func (h *CriterionHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CriterionHandler) Create(w http.ResponseWriter, r *http.Request) {
-	if AdminCheck(w, r) {
-		return
-	}
-
 	var request struct {
 		Text string `json:"text" bson:"text" validate:"required,min=1,max=40"`
 	}
-	if DefaultParseAndValidate(w, r, &request) {
-		return
-	}
-
-	Create(w, r, h.Repo, &models.Criterion{
-		Text: request.Text,
+	AdminOnlyCreate(w, r, h.Repo, &request, func() *models.Criterion {
+		return &models.Criterion{
+			Text: request.Text,
+		}
 	})
 }
 

@@ -21,24 +21,17 @@ func (h *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
-	if AdminCheck(w, r) {
-		return
-	}
-
-	// Parse
 	var request struct {
 		Name        string    `json:"name" bson:"name,omitempty" validate:"required,min=1,max=40"`
 		Description string    `json:"description" bson:"description" validate:"required"`
 		Time        time.Time `json:"time" bson:"time" validate:"required"`
 	}
-	if DefaultParseAndValidate(w, r, &request) {
-		return
-	}
-
-	Create(w, r, h.Repo, &models.Event{
-		Name:        request.Name,
-		Description: request.Description,
-		Time:        request.Time,
+	AdminOnlyCreate(w, r, h.Repo, &request, func() *models.Event {
+		return &models.Event{
+			Name:        request.Name,
+			Description: request.Description,
+			Time:        request.Time,
+		}
 	})
 }
 
