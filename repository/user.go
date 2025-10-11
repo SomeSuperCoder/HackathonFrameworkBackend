@@ -38,7 +38,6 @@ func (r *UserRepo) GetByUsername(ctx context.Context, username string) (*models.
 
 func (r *UserRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
 	return Update(ctx, r.Users, id, update)
-
 }
 
 func (r *UserRepo) Delete(ctx context.Context, id bson.ObjectID) error {

@@ -3,10 +3,45 @@ package repository
 import (
 	"context"
 
+	"github.com/SomeSuperCoder/global-chat/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
+
+type GenericRepo[T any] struct {
+	database   *mongo.Database
+	Collection *mongo.Collection
+}
+
+func NewGenericRepo[T any](database *mongo.Database, collectionName string) *GenericRepo[T] {
+	return &GenericRepo[T]{
+		database:   database,
+		Collection: database.Collection(collectionName),
+	}
+}
+
+func (r *GenericRepo[T]) Find(ctx context.Context) ([]T, error) {
+	return Find[T](ctx, r.Collection)
+}
+
+func (r *GenericRepo[T]) Create(ctx context.Context, value *models.Case) (bson.ObjectID, error) {
+	return Create(ctx, r.Collection, value)
+}
+
+func (r *GenericRepo[T]) GetByID(ctx context.Context, id bson.ObjectID) (*T, error) {
+	return GetByID[T](ctx, r.Collection, id)
+}
+
+func (r *GenericRepo[T]) Update(ctx context.Context, id bson.ObjectID, update any) error {
+	return Update(ctx, r.Collection, id, update)
+}
+
+func (r *GenericRepo[T]) Delete(ctx context.Context, id bson.ObjectID) error {
+	return Delete(ctx, r.Collection, id)
+}
+
+// =============================
 
 func Find[T any](ctx context.Context, c *mongo.Collection) ([]T, error) {
 	return FindWithFilter[T](ctx, c, struct{}{})
