@@ -9,10 +9,14 @@ import (
 )
 
 func Find[T any](ctx context.Context, c *mongo.Collection) ([]T, error) {
+	return FindWithFilter[T](ctx, c, struct{}{})
+}
+
+func FindWithFilter[T any](ctx context.Context, c *mongo.Collection, filter any) ([]T, error) {
 	var values = []T{}
 
 	// Init a cursor
-	cursor, err := c.Find(ctx, bson.M{}, nil)
+	cursor, err := c.Find(ctx, filter, nil)
 	if err != nil {
 		return nil, err
 	}

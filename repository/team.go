@@ -36,22 +36,9 @@ func (r *TeamRepo) GetByID(ctx context.Context, id bson.ObjectID) (*models.Team,
 }
 
 func (r *TeamRepo) GetMembers(ctx context.Context, id bson.ObjectID) ([]models.User, error) {
-	var members = []models.User{}
-	cursor, err := r.Users.Find(ctx, bson.M{
+	return FindWithFilter[models.User](ctx, r.Users, bson.M{
 		"team": id,
-	}, nil)
-
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	err = cursor.All(ctx, &members)
-	if err != nil {
-		return nil, err
-	}
-
-	return members, nil
+	})
 }
 
 func (r *TeamRepo) Update(ctx context.Context, id bson.ObjectID, update any) error {
