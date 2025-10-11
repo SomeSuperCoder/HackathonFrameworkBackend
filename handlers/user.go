@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -104,29 +103,12 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	// Load data
-	var parsedId bson.ObjectID
-	var exit bool
-	if parsedId, exit = utils.ParseRequestID(w, r); exit {
-		return
-	}
-
-	// Get auth data
-	userAuth := middleware.ExtractUserAuth(r)
-
-	// Check access
-	if userAuth.Role == models.Admin || parsedId == userAuth.ID {
-	} else {
-		http.Error(w, "Access denied", http.StatusForbidden)
-		return
-	}
-
-	// Do work
-	err := h.Repo.Delete(r.Context(), parsedId)
-	if utils.CheckError(w, err, "Failed to delete", http.StatusInternalServerError) {
-		return
-	}
-
-	// Respond
-	fmt.Fprintf(w, "Successfully deleted")
+	Delete(w, r, h.Repo, func(w http.ResponseWriter, r *http.Request, id bson.ObjectID, userAuth *models.User, repo any) bool {
+		if userAuth.Role == models.Admin || id == userAuth.ID {
+			return false
+		} else {
+			http.Error(w, "Access denied", http.StatusForbidden)
+			return true
+		}
+	})
 }
